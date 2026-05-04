@@ -39,7 +39,7 @@ Recommended Zenodo deposit contents:
 
 After downloading the Zenodo archive, extract it into the repository root so those paths exist locally.
 
-Zenodo DOI: `TODO: add after deposit`
+Zenodo DOI: `https://doi.org/10.5281/zenodo.20024166`
 
 ## Data Excluded
 
