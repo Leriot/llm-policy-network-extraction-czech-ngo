@@ -1,0 +1,654 @@
+MASTER NETWORK COMPARISON REPORT
+==================================================================================
+Generated on: 2026-04-14 13:30:28.739365
+Ground Truth Reference Network: COMPON 2025
+Network types: LLM-validated (A/B/C) and Raw scraped (D/E/F)
+==================================================================================
+
+PART 1: OVERALL EXECUTIVE SUMMARIES
+==================================================================================
+
+1. OVERALL NETWORK DESCRIPTIVES
+----------------------------------------------------------------------------------
+Network              | Nodes  | Edges  | Density  | Reciprocity | Transitivity
+---------------------|--------|--------|----------|-------------|-------------
+COMPON 2025 (Ref)    | 19     | 155    | 0.4532   | 0.7018      | 0.6891      
+LLM 2025             | 19     | 59     | 0.1725   | 0.8187      | 0.7143      
+LLM 2024+2025        | 19     | 69     | 0.2018   | 0.8070      | 0.6358      
+LLM 2016-2025        | 19     | 94     | 0.2749   | 0.7427      | 0.6596      
+Raw 2025             | 19     | 65     | 0.1901   | 0.8304      | 0.7048      
+Raw 2024+2025        | 19     | 77     | 0.2251   | 0.7836      | 0.6312      
+Raw 2016-2025        | 19     | 117    | 0.3421   | 0.6550      | 0.6735      
+
+2. OVERALL EDGE OVERLAP & ACCURACY (vs COMPON 2025)
+----------------------------------------------------------------------------------
+Network              | F1 Score | Jaccard Sim | Precision | Recall   | Hamming 
+---------------------|----------|-------------|-----------|----------|----------
+LLM 2025             | 0.402    | 0.251       | 0.729     | 0.277    | 128     
+LLM 2024+2025        | 0.464    | 0.302       | 0.754     | 0.335    | 120     
+LLM 2016-2025        | 0.554    | 0.383       | 0.734     | 0.445    | 111     
+Raw 2025             | 0.445    | 0.287       | 0.754     | 0.316    | 122     
+Raw 2024+2025        | 0.509    | 0.341       | 0.766     | 0.381    | 114     
+Raw 2016-2025        | 0.581    | 0.409       | 0.675     | 0.510    | 114     
+
+3. OVERALL NODE-LEVEL CORRELATIONS (Spearman r)
+----------------------------------------------------------------------------------
+Network              | In-Degree (r)  | Out-Degree (r)
+---------------------|----------------|----------------
+LLM 2025             | 0.446          | 0.417         
+LLM 2024+2025        | 0.494          | 0.467         
+LLM 2016-2025        | 0.559          | 0.477         
+Raw 2025             | 0.426          | 0.534         
+Raw 2024+2025        | 0.482          | 0.651         
+Raw 2016-2025        | 0.555          | 0.524         
+
+4. OVERALL QAP STATISTICS
+----------------------------------------------------------------------------------
+Network              | QAP Cor (gcor) | p-value   | Log Reg Coef | Odds Ratio
+---------------------|----------------|-----------|--------------|-------------
+LLM 2025             | 0.2528         | 0.0052    | 1.4118       | 4.1032    
+LLM 2024+2025        | 0.3034         | 0.0010    | 1.6191       | 5.0485    
+LLM 2016-2025        | 0.3473         | 0.0002    | 1.6485       | 5.1991    
+Raw 2025             | 0.2925         | 0.0020    | 1.5975       | 4.9404    
+Raw 2024+2025        | 0.3389         | 0.0002    | 1.7527       | 5.7703    
+Raw 2016-2025        | 0.3216         | 0.0005    | 1.4051       | 4.0758    
+
+==================================================================================
+
+4b. MRQAP HIERARCHICAL SUMMARY
+----------------------------------------------------------------------------------
+  Step 1: Base — Y ~ Predictor only (raw accuracy)
+  Network              | Coef       | p        | Pseudo-R2     
+  ---------------------|-----------|---------|---------------
+  LLM 2025             |    +1.4118 | 0.0048   | 0.0532        
+  LLM 2024+2025        |    +1.6191 | 0.0015   | 0.0743        
+  LLM 2016-2025        |    +1.6485 | 0.0001   | 0.0951        
+  Raw 2025             |    +1.5975 | 0.0022   | 0.0695        
+  Raw 2024+2025        |    +1.7527 | 0.0003   | 0.0915        
+  Raw 2016-2025        |    +1.4051 | 0.0005   | 0.0818        
+
+  Step 2: Controlled — Y ~ Predictor + Transitivity + Reciprocity
+  Network              | Main Coef  | Main p   | Trans Coef             | Trans p  | Recip Coef             | Recip p  | Pseudo-R2     
+  ---------------------|-----------|---------|------------------------|---------|------------------------|---------|---------------
+  LLM 2025             |    +0.9819 | 0.0204   |                +2.0990 | 0.0243   |                +1.4226 | 0.0000   | 0.1753        
+  LLM 2024+2025        |    +1.1692 | 0.0044   |                +2.0452 | 0.0264   |                +1.3756 | 0.0000   | 0.1859        
+  LLM 2016-2025        |    +1.2055 | 0.0017   |                +2.0830 | 0.0328   |                +1.3122 | 0.0001   | 0.1957        
+  Raw 2025             |    +1.1563 | 0.0060   |                +2.0587 | 0.0254   |                +1.3890 | 0.0000   | 0.1840        
+  Raw 2024+2025        |    +1.2974 | 0.0005   |                +1.9983 | 0.0283   |                +1.3398 | 0.0000   | 0.1952        
+  Raw 2016-2025        |    +1.0219 | 0.0041   |                +2.0566 | 0.0311   |                +1.3672 | 0.0000   | 0.1893        
+
+  Controls derived from COMPON 2025 (DV). If Main Coef stays significant
+  in Step 2, the predictor captures unique ties beyond structural tendencies.
+
+5. LLM VALIDATION EFFECT (Raw -> LLM delta vs COMPON 2025)
+----------------------------------------------------------------------------------
+  Window       | Raw F1   | LLM F1   | D F1     | Raw Prec | LLM Prec | D Prec   | Raw Rec   | LLM Rec   | D Recall  
+  -------------|---------|---------|---------|---------|---------|--------| ----------|----------|----------
+  2025         | 0.445    | 0.402    | -0.044   | 0.754    | 0.729    | -0.025   | 0.316     | 0.277     | -0.039    
+  2024+2025    | 0.509    | 0.464    | -0.044   | 0.766    | 0.754    | -0.013   | 0.381     | 0.335     | -0.045    
+  2016-2025    | 0.581    | 0.554    | -0.027   | 0.675    | 0.734    | 0.059    | 0.510     | 0.445     | -0.065    
+
+  Note: Positive delta = LLM-validated improves over raw scraped vs COMPON.
+  Negative delta = raw scraped is closer to COMPON than LLM output.
+
+6. RAW vs LLM EDGE OVERLAP (within time window — structural similarity)
+----------------------------------------------------------------------------------
+  Window         | Precision | Recall   | F1       | Jaccard  | Hamming 
+  --------------|-----------|---------|---------|---------|----------
+  2025           | 0.908     | 1.000    | 0.952    | 0.908    | 6       
+  2024+2025      | 0.896     | 1.000    | 0.945    | 0.896    | 8       
+  2016-2025      | 0.803     | 1.000    | 0.891    | 0.803    | 23      
+
+  Note: Precision = (Raw & LLM) / Raw. Recall = (Raw & LLM) / LLM.
+  High F1 = raw and LLM largely agree; low F1 = LLM removed many raw edges.
+
+==================================================================================
+
+
+PART 2: DETAILED PER-CASE BREAKDOWNS
+==================================================================================
+
+COMPARISON A: LLM 2025
+--------------------------------------------------
+
+1. Basic Descriptives
+Metric          | LLM 2025        | COMPON 2025    
+----------------|-----------------|----------------
+Nodes           | 19              | 19             
+Edges           | 59              | 155            
+Density         | 0.1725          | 0.4532         
+Reciprocity     | 0.8187          | 0.7018         
+Transitivity    | 0.7143          | 0.6891         
+
+2. Geodesic Distance Statistics
+  Metric                       | LLM 2025     | COMPON 2025 
+  Mean geodesic dist (reachable) | 1.607        | 1.565       
+  Diameter                     | 4            | 3           
+  Reachable pair share         | 0.342        | 0.947       
+
+3. ESP Distribution (OTP shared partners)
+  LLM 2025: 0 = 22  1 = 11  2 = 0  3 = 0  4 = 3  5 = 7  6 = 4  7 = 0  8 = 10
+  COMPON: 0 = 4  1 = 7  2 = 10  3 = 10  4 = 27  5 = 21  6 = 13  7 = 14  8 = 12
+
+4. Edge Overlap & Accuracy
+  TP / FP / FN / TN: 43 / 16 / 112 / 171
+  Precision:         0.729
+  Recall:            0.277
+  F1 Score:          0.402
+  Jaccard Sim:       0.251
+  Hamming Dist:      128
+
+5. Node-Level Correlations
+  In-Degree Spearman r:  0.446
+  Out-Degree Spearman r: 0.417
+
+6. QAP Matrix Significance
+  QAP Matrix Cor (gcor):      0.2528 (p-value = 0.0067)
+  QAP Log Reg Coef:           1.4118 (p-value = 0.0052)
+  Odds Ratio (e^coef):        4.1032
+
+6b. MRQAP Step 1 — Base (unadjusted)
+  LLM 2025                   Coef:  +1.4118  OR:  4.1032  p: 0.0048  Pseudo-R2: 0.0532
+
+6c. MRQAP Step 2 — Controlled (Transitivity + Reciprocity)
+  LLM 2025                   Coef:  +0.9819  OR:  2.6695  p: 0.0204
+  Transitivity (2-path)      Coef:  +2.0990  OR:  8.1581  p: 0.0243
+  Reciprocity                Coef:  +1.4226  OR:  4.1480  p: 0.0000
+  Pseudo-R2 (McFadden): 0.1753
+
+7. CUG Test Results
+  [LLM 2025 | conditioned on: Edges]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.8187   | 0.7139    | 0.0218   | +4.80***  p=< 0.0001
+  transitivity   | 0.7143   | 0.1680    | 0.0313   | +17.47***  p=< 0.0001
+  indeg_var      | 5.8772   | 2.5760    | 0.8384   | +3.94**   p=0.0037
+  outdeg_var     | 18.9883  | 2.5705    | 0.8297   | +19.79***  p=< 0.0001
+  mutual_dyads   | 14.0000  | 5.0191    | 1.8601   | +4.83***  p=0.0001
+
+  [LLM 2025 | conditioned on: Dyad Census]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.8187   | 0.8187    | 0.0000   | +0.00     p=1.0000
+  transitivity   | 0.7143   | 0.1653    | 0.0392   | +14.00***  p=< 0.0001
+  indeg_var      | 5.8772   | 2.5274    | 0.8073   | +4.15**   p=0.0013
+  outdeg_var     | 18.9883  | 2.5352    | 0.8141   | +20.21***  p=< 0.0001
+  mutual_dyads   | 14.0000  | 14.0000   | 0.0000   | +0.00     p=1.0000
+
+==================================================================================
+
+COMPARISON B: LLM 2024+2025
+--------------------------------------------------
+
+1. Basic Descriptives
+Metric          | LLM 2024+25     | COMPON 2025    
+----------------|-----------------|----------------
+Nodes           | 19              | 19             
+Edges           | 69              | 155            
+Density         | 0.2018          | 0.4532         
+Reciprocity     | 0.8070          | 0.7018         
+Transitivity    | 0.6358          | 0.6891         
+
+2. Geodesic Distance Statistics
+  Metric                       | LLM 2024+25  | COMPON 2025 
+  Mean geodesic dist (reachable) | 1.756        | 1.565       
+  Diameter                     | 4            | 3           
+  Reachable pair share         | 0.491        | 0.947       
+
+3. ESP Distribution (OTP shared partners)
+  LLM 2024+25: 0 = 16  1 = 16  2 = 4  3 = 7  4 = 3  5 = 7  6 = 4  7 = 0  8 = 4
+  COMPON: 0 = 4  1 = 7  2 = 10  3 = 10  4 = 27  5 = 21  6 = 13  7 = 14  8 = 12
+
+4. Edge Overlap & Accuracy
+  TP / FP / FN / TN: 52 / 17 / 103 / 170
+  Precision:         0.754
+  Recall:            0.335
+  F1 Score:          0.464
+  Jaccard Sim:       0.302
+  Hamming Dist:      120
+
+5. Node-Level Correlations
+  In-Degree Spearman r:  0.494
+  Out-Degree Spearman r: 0.467
+
+6. QAP Matrix Significance
+  QAP Matrix Cor (gcor):      0.3034 (p-value = 0.0012)
+  QAP Log Reg Coef:           1.6191 (p-value = 0.0010)
+  Odds Ratio (e^coef):        5.0485
+
+6b. MRQAP Step 1 — Base (unadjusted)
+  LLM 2024+25                Coef:  +1.6191  OR:  5.0485  p: 0.0015  Pseudo-R2: 0.0743
+
+6c. MRQAP Step 2 — Controlled (Transitivity + Reciprocity)
+  LLM 2024+25                Coef:  +1.1692  OR:  3.2193  p: 0.0044
+  Transitivity (2-path)      Coef:  +2.0452  OR:  7.7307  p: 0.0264
+  Reciprocity                Coef:  +1.3756  OR:  3.9575  p: 0.0000
+  Pseudo-R2 (McFadden): 0.1859
+
+7. CUG Test Results
+  [LLM 2024+25 | conditioned on: Edges]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.8070   | 0.6772    | 0.0244   | +5.32***  p=< 0.0001
+  transitivity   | 0.6358   | 0.1972    | 0.0285   | +15.37***  p=< 0.0001
+  indeg_var      | 6.8012   | 2.9066    | 0.9408   | +4.14**   p=0.0017
+  outdeg_var     | 19.3567  | 2.9020    | 0.9377   | +17.55***  p=< 0.0001
+  mutual_dyads   | 18.0000  | 6.8693    | 2.1155   | +5.26***  p=< 0.0001
+
+  [LLM 2024+25 | conditioned on: Dyad Census]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.8070   | 0.8070    | 0.0000   | +0.00     p=1.0000
+  transitivity   | 0.6358   | 0.1945    | 0.0365   | +12.10***  p=< 0.0001
+  indeg_var      | 6.8012   | 2.8318    | 0.9117   | +4.35**   p=0.0011
+  outdeg_var     | 19.3567  | 2.8447    | 0.9139   | +18.07***  p=< 0.0001
+  mutual_dyads   | 18.0000  | 18.0000   | 0.0000   | +0.00     p=1.0000
+
+==================================================================================
+
+COMPARISON C: LLM 2016-2025
+--------------------------------------------------
+
+1. Basic Descriptives
+Metric          | LLM 2016-25     | COMPON 2025    
+----------------|-----------------|----------------
+Nodes           | 19              | 19             
+Edges           | 94              | 155            
+Density         | 0.2749          | 0.4532         
+Reciprocity     | 0.7427          | 0.7018         
+Transitivity    | 0.6596          | 0.6891         
+
+2. Geodesic Distance Statistics
+  Metric                       | LLM 2016-25  | COMPON 2025 
+  Mean geodesic dist (reachable) | 1.768        | 1.565       
+  Diameter                     | 4            | 3           
+  Reachable pair share         | 0.655        | 0.947       
+
+3. ESP Distribution (OTP shared partners)
+  LLM 2016-25: 0 = 22  1 = 12  2 = 12  3 = 8  4 = 12  5 = 0  6 = 0  7 = 2  8 = 9
+  COMPON: 0 = 4  1 = 7  2 = 10  3 = 10  4 = 27  5 = 21  6 = 13  7 = 14  8 = 12
+
+4. Edge Overlap & Accuracy
+  TP / FP / FN / TN: 69 / 25 / 86 / 162
+  Precision:         0.734
+  Recall:            0.445
+  F1 Score:          0.554
+  Jaccard Sim:       0.383
+  Hamming Dist:      111
+
+5. Node-Level Correlations
+  In-Degree Spearman r:  0.559
+  Out-Degree Spearman r: 0.477
+
+6. QAP Matrix Significance
+  QAP Matrix Cor (gcor):      0.3473 (p-value = 0.0001)
+  QAP Log Reg Coef:           1.6485 (p-value = 0.0002)
+  Odds Ratio (e^coef):        5.1991
+
+6b. MRQAP Step 1 — Base (unadjusted)
+  LLM 2016-25                Coef:  +1.6485  OR:  5.1991  p: 0.0001  Pseudo-R2: 0.0951
+
+6c. MRQAP Step 2 — Controlled (Transitivity + Reciprocity)
+  LLM 2016-25                Coef:  +1.2055  OR:  3.3383  p: 0.0017
+  Transitivity (2-path)      Coef:  +2.0830  OR:  8.0284  p: 0.0328
+  Reciprocity                Coef:  +1.3122  OR:  3.7145  p: 0.0001
+  Pseudo-R2 (McFadden): 0.1957
+
+7. CUG Test Results
+  [LLM 2016-25 | conditioned on: Edges]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.7427   | 0.6003    | 0.0304   | +4.68***  p=< 0.0001
+  transitivity   | 0.6596   | 0.2705    | 0.0238   | +16.34***  p=< 0.0001
+  indeg_var      | 6.8304   | 3.5914    | 1.1663   | +2.78*    p=0.0223
+  outdeg_var     | 28.7193  | 3.5991    | 1.1612   | +21.63***  p=< 0.0001
+  mutual_dyads   | 25.0000  | 12.8048   | 2.6380   | +4.62***  p=< 0.0001
+
+  [LLM 2016-25 | conditioned on: Dyad Census]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.7427   | 0.7427    | 0.0000   | +0.00     p=1.0000
+  transitivity   | 0.6596   | 0.2684    | 0.0285   | +13.70***  p=< 0.0001
+  indeg_var      | 6.8304   | 3.5209    | 1.1501   | +2.88*    p=0.0193
+  outdeg_var     | 28.7193  | 3.5308    | 1.1443   | +22.01***  p=< 0.0001
+  mutual_dyads   | 25.0000  | 25.0000   | 0.0000   | +0.00     p=1.0000
+
+==================================================================================
+
+COMPARISON D: RAW 2025
+--------------------------------------------------
+
+1. Basic Descriptives
+Metric          | Raw 2025        | COMPON 2025    
+----------------|-----------------|----------------
+Nodes           | 19              | 19             
+Edges           | 65              | 155            
+Density         | 0.1901          | 0.4532         
+Reciprocity     | 0.8304          | 0.7018         
+Transitivity    | 0.7048          | 0.6891         
+
+2. Geodesic Distance Statistics
+  Metric                       | Raw 2025     | COMPON 2025 
+  Mean geodesic dist (reachable) | 1.585        | 1.565       
+  Diameter                     | 3            | 3           
+  Reachable pair share         | 0.380        | 0.947       
+
+3. ESP Distribution (OTP shared partners)
+  Raw 2025: 0 = 17  1 = 12  2 = 1  3 = 6  4 = 5  5 = 5  6 = 4  7 = 3  8 = 8
+  COMPON: 0 = 4  1 = 7  2 = 10  3 = 10  4 = 27  5 = 21  6 = 13  7 = 14  8 = 12
+
+4. Edge Overlap & Accuracy
+  TP / FP / FN / TN: 49 / 16 / 106 / 171
+  Precision:         0.754
+  Recall:            0.316
+  F1 Score:          0.445
+  Jaccard Sim:       0.287
+  Hamming Dist:      122
+
+5. Node-Level Correlations
+  In-Degree Spearman r:  0.426
+  Out-Degree Spearman r: 0.534
+
+6. QAP Matrix Significance
+  QAP Matrix Cor (gcor):      0.2925 (p-value = 0.0029)
+  QAP Log Reg Coef:           1.5975 (p-value = 0.0020)
+  Odds Ratio (e^coef):        4.9404
+
+6b. MRQAP Step 1 — Base (unadjusted)
+  Raw 2025                   Coef:  +1.5975  OR:  4.9404  p: 0.0022  Pseudo-R2: 0.0695
+
+6c. MRQAP Step 2 — Controlled (Transitivity + Reciprocity)
+  Raw 2025                   Coef:  +1.1563  OR:  3.1780  p: 0.0060
+  Transitivity (2-path)      Coef:  +2.0587  OR:  7.8361  p: 0.0254
+  Reciprocity                Coef:  +1.3890  OR:  4.0107  p: 0.0000
+  Pseudo-R2 (McFadden): 0.1840
+
+7. CUG Test Results
+  [Raw 2025 | conditioned on: Edges]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.8304   | 0.6912    | 0.0234   | +5.96***  p=< 0.0001
+  transitivity   | 0.7048   | 0.1852    | 0.0298   | +17.43***  p=< 0.0001
+  indeg_var      | 7.1462   | 2.7753    | 0.9018   | +4.85***  p=0.0001
+  outdeg_var     | 19.7018  | 2.7913    | 0.8993   | +18.80***  p=< 0.0001
+  mutual_dyads   | 18.0000  | 6.1173    | 2.0214   | +5.88***  p=< 0.0001
+
+  [Raw 2025 | conditioned on: Dyad Census]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.8304   | 0.8304    | 0.0000   | +0.00     p=1.0000
+  transitivity   | 0.7048   | 0.1821    | 0.0394   | +13.26***  p=< 0.0001
+  indeg_var      | 7.1462   | 2.7136    | 0.8743   | +5.07***  p=0.0003
+  outdeg_var     | 19.7018  | 2.7054    | 0.8776   | +19.37***  p=< 0.0001
+  mutual_dyads   | 18.0000  | 18.0000   | 0.0000   | +0.00     p=1.0000
+
+==================================================================================
+
+COMPARISON E: RAW 2024+2025
+--------------------------------------------------
+
+1. Basic Descriptives
+Metric          | Raw 2024+25     | COMPON 2025    
+----------------|-----------------|----------------
+Nodes           | 19              | 19             
+Edges           | 77              | 155            
+Density         | 0.2251          | 0.4532         
+Reciprocity     | 0.7836          | 0.7018         
+Transitivity    | 0.6312          | 0.6891         
+
+2. Geodesic Distance Statistics
+  Metric                       | Raw 2024+25  | COMPON 2025 
+  Mean geodesic dist (reachable) | 1.851        | 1.565       
+  Diameter                     | 4            | 3           
+  Reachable pair share         | 0.608        | 0.947       
+
+3. ESP Distribution (OTP shared partners)
+  Raw 2024+25: 0 = 18  1 = 18  2 = 6  3 = 2  4 = 5  5 = 8  6 = 5  7 = 3  8 = 2
+  COMPON: 0 = 4  1 = 7  2 = 10  3 = 10  4 = 27  5 = 21  6 = 13  7 = 14  8 = 12
+
+4. Edge Overlap & Accuracy
+  TP / FP / FN / TN: 59 / 18 / 96 / 169
+  Precision:         0.766
+  Recall:            0.381
+  F1 Score:          0.509
+  Jaccard Sim:       0.341
+  Hamming Dist:      114
+
+5. Node-Level Correlations
+  In-Degree Spearman r:  0.482
+  Out-Degree Spearman r: 0.651
+
+6. QAP Matrix Significance
+  QAP Matrix Cor (gcor):      0.3389 (p-value = 0.0001)
+  QAP Log Reg Coef:           1.7527 (p-value = 0.0002)
+  Odds Ratio (e^coef):        5.7703
+
+6b. MRQAP Step 1 — Base (unadjusted)
+  Raw 2024+25                Coef:  +1.7527  OR:  5.7703  p: 0.0003  Pseudo-R2: 0.0915
+
+6c. MRQAP Step 2 — Controlled (Transitivity + Reciprocity)
+  Raw 2024+25                Coef:  +1.2974  OR:  3.6598  p: 0.0005
+  Transitivity (2-path)      Coef:  +1.9983  OR:  7.3763  p: 0.0283
+  Reciprocity                Coef:  +1.3398  OR:  3.8183  p: 0.0000
+  Pseudo-R2 (McFadden): 0.1952
+
+7. CUG Test Results
+  [Raw 2024+25 | conditioned on: Edges]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.7836   | 0.6500    | 0.0267   | +5.01***  p=< 0.0001
+  transitivity   | 0.6312   | 0.2210    | 0.0271   | +15.15***  p=< 0.0001
+  indeg_var      | 6.7193   | 3.1567    | 1.0183   | +3.50**   p=0.0052
+  outdeg_var     | 21.6082  | 3.1507    | 1.0130   | +18.22***  p=< 0.0001
+  mutual_dyads   | 20.0000  | 8.5929    | 2.2404   | +5.09***  p=< 0.0001
+
+  [Raw 2024+25 | conditioned on: Dyad Census]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.7836   | 0.7836    | 0.0000   | +0.00     p=1.0000
+  transitivity   | 0.6312   | 0.2180    | 0.0332   | +12.45***  p=< 0.0001
+  indeg_var      | 6.7193   | 3.0811    | 0.9937   | +3.66**   p=0.0040
+  outdeg_var     | 21.6082  | 3.0915    | 0.9899   | +18.71***  p=< 0.0001
+  mutual_dyads   | 20.0000  | 20.0000   | 0.0000   | +0.00     p=1.0000
+
+==================================================================================
+
+COMPARISON F: RAW 2016-2025
+--------------------------------------------------
+
+1. Basic Descriptives
+Metric          | Raw 2016-25     | COMPON 2025    
+----------------|-----------------|----------------
+Nodes           | 19              | 19             
+Edges           | 117             | 155            
+Density         | 0.3421          | 0.4532         
+Reciprocity     | 0.6550          | 0.7018         
+Transitivity    | 0.6735          | 0.6891         
+
+2. Geodesic Distance Statistics
+  Metric                       | Raw 2016-25  | COMPON 2025 
+  Mean geodesic dist (reachable) | 1.588        | 1.565       
+  Diameter                     | 3            | 3           
+  Reachable pair share         | 0.696        | 0.947       
+
+3. ESP Distribution (OTP shared partners)
+  Raw 2016-25: 0 = 27  1 = 12  2 = 6  3 = 18  4 = 6  5 = 14  6 = 5  7 = 1  8 = 0
+  COMPON: 0 = 4  1 = 7  2 = 10  3 = 10  4 = 27  5 = 21  6 = 13  7 = 14  8 = 12
+
+4. Edge Overlap & Accuracy
+  TP / FP / FN / TN: 79 / 38 / 76 / 149
+  Precision:         0.675
+  Recall:            0.510
+  F1 Score:          0.581
+  Jaccard Sim:       0.409
+  Hamming Dist:      114
+
+5. Node-Level Correlations
+  In-Degree Spearman r:  0.555
+  Out-Degree Spearman r: 0.524
+
+6. QAP Matrix Significance
+  QAP Matrix Cor (gcor):      0.3216 (p-value = 0.0005)
+  QAP Log Reg Coef:           1.4051 (p-value = 0.0005)
+  Odds Ratio (e^coef):        4.0758
+
+6b. MRQAP Step 1 — Base (unadjusted)
+  Raw 2016-25                Coef:  +1.4051  OR:  4.0758  p: 0.0005  Pseudo-R2: 0.0818
+
+6c. MRQAP Step 2 — Controlled (Transitivity + Reciprocity)
+  Raw 2016-25                Coef:  +1.0219  OR:  2.7784  p: 0.0041
+  Transitivity (2-path)      Coef:  +2.0566  OR:  7.8196  p: 0.0311
+  Reciprocity                Coef:  +1.3672  OR:  3.9245  p: 0.0000
+  Pseudo-R2 (McFadden): 0.1893
+
+7. CUG Test Results
+  [Raw 2016-25 | conditioned on: Edges]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.6550   | 0.5482    | 0.0344   | +3.10**   p=0.0031
+  transitivity   | 0.6735   | 0.3384    | 0.0204   | +16.43***  p=< 0.0001
+  indeg_var      | 7.3626   | 4.0651    | 1.3154   | +2.51*    p=0.0335
+  outdeg_var     | 34.5848  | 4.0922    | 1.3430   | +22.71***  p=< 0.0001
+  mutual_dyads   | 29.0000  | 19.8958   | 2.9223   | +3.12**   p=0.0027
+
+  [Raw 2016-25 | conditioned on: Dyad Census]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.6550   | 0.6550    | 0.0000   | +0.00     p=1.0000
+  transitivity   | 0.6735   | 0.3372    | 0.0224   | +15.04***  p=< 0.0001
+  indeg_var      | 7.3626   | 4.0251    | 1.3183   | +2.53*    p=0.0344
+  outdeg_var     | 34.5848  | 4.0137    | 1.3185   | +23.19***  p=< 0.0001
+  mutual_dyads   | 29.0000  | 29.0000   | 0.0000   | +0.00     p=1.0000
+
+==================================================================================
+
+PART 3: CUG TESTS — ALL NETWORKS (Strict, reps=2000)
+----------------------------------------------------------------------------------
+  [COMPON 2025 | conditioned on: Edges]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.7018   | 0.5029    | 0.0375   | +5.31***  p=< 0.0001
+  transitivity   | 0.6891   | 0.4499    | 0.0157   | +15.25***  p=< 0.0001
+  indeg_var      | 17.5848  | 4.4680    | 1.4500   | +9.05***  p=< 0.0001
+  outdeg_var     | 23.3626  | 4.4754    | 1.4534   | +13.00***  p=< 0.0001
+  mutual_dyads   | 52.0000  | 35.0057   | 3.2330   | +5.26***  p=< 0.0001
+
+  [COMPON 2025 | conditioned on: Dyad Census]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.7018   | 0.7018    | 0.0000   | +0.00     p=1.0000
+  transitivity   | 0.6891   | 0.4487    | 0.0184   | +13.05***  p=< 0.0001
+  indeg_var      | 17.5848  | 4.3809    | 1.4212   | +9.29***  p=< 0.0001
+  outdeg_var     | 23.3626  | 4.3788    | 1.4096   | +13.47***  p=< 0.0001
+  mutual_dyads   | 52.0000  | 52.0000   | 0.0000   | +0.00     p=1.0000
+
+  [LLM 2025 | conditioned on: Edges]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.8187   | 0.7139    | 0.0218   | +4.80***  p=< 0.0001
+  transitivity   | 0.7143   | 0.1680    | 0.0313   | +17.47***  p=< 0.0001
+  indeg_var      | 5.8772   | 2.5760    | 0.8384   | +3.94**   p=0.0037
+  outdeg_var     | 18.9883  | 2.5705    | 0.8297   | +19.79***  p=< 0.0001
+  mutual_dyads   | 14.0000  | 5.0191    | 1.8601   | +4.83***  p=0.0001
+
+  [LLM 2025 | conditioned on: Dyad Census]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.8187   | 0.8187    | 0.0000   | +0.00     p=1.0000
+  transitivity   | 0.7143   | 0.1653    | 0.0392   | +14.00***  p=< 0.0001
+  indeg_var      | 5.8772   | 2.5274    | 0.8073   | +4.15**   p=0.0013
+  outdeg_var     | 18.9883  | 2.5352    | 0.8141   | +20.21***  p=< 0.0001
+  mutual_dyads   | 14.0000  | 14.0000   | 0.0000   | +0.00     p=1.0000
+
+  [LLM 2024+2025 | conditioned on: Edges]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.8070   | 0.6772    | 0.0244   | +5.32***  p=< 0.0001
+  transitivity   | 0.6358   | 0.1972    | 0.0285   | +15.37***  p=< 0.0001
+  indeg_var      | 6.8012   | 2.9066    | 0.9408   | +4.14**   p=0.0017
+  outdeg_var     | 19.3567  | 2.9020    | 0.9377   | +17.55***  p=< 0.0001
+  mutual_dyads   | 18.0000  | 6.8693    | 2.1155   | +5.26***  p=< 0.0001
+
+  [LLM 2024+2025 | conditioned on: Dyad Census]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.8070   | 0.8070    | 0.0000   | +0.00     p=1.0000
+  transitivity   | 0.6358   | 0.1945    | 0.0365   | +12.10***  p=< 0.0001
+  indeg_var      | 6.8012   | 2.8318    | 0.9117   | +4.35**   p=0.0011
+  outdeg_var     | 19.3567  | 2.8447    | 0.9139   | +18.07***  p=< 0.0001
+  mutual_dyads   | 18.0000  | 18.0000   | 0.0000   | +0.00     p=1.0000
+
+  [LLM 2016-2025 | conditioned on: Edges]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.7427   | 0.6003    | 0.0304   | +4.68***  p=< 0.0001
+  transitivity   | 0.6596   | 0.2705    | 0.0238   | +16.34***  p=< 0.0001
+  indeg_var      | 6.8304   | 3.5914    | 1.1663   | +2.78*    p=0.0223
+  outdeg_var     | 28.7193  | 3.5991    | 1.1612   | +21.63***  p=< 0.0001
+  mutual_dyads   | 25.0000  | 12.8048   | 2.6380   | +4.62***  p=< 0.0001
+
+  [LLM 2016-2025 | conditioned on: Dyad Census]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.7427   | 0.7427    | 0.0000   | +0.00     p=1.0000
+  transitivity   | 0.6596   | 0.2684    | 0.0285   | +13.70***  p=< 0.0001
+  indeg_var      | 6.8304   | 3.5209    | 1.1501   | +2.88*    p=0.0193
+  outdeg_var     | 28.7193  | 3.5308    | 1.1443   | +22.01***  p=< 0.0001
+  mutual_dyads   | 25.0000  | 25.0000   | 0.0000   | +0.00     p=1.0000
+
+  [Raw 2025 | conditioned on: Edges]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.8304   | 0.6912    | 0.0234   | +5.96***  p=< 0.0001
+  transitivity   | 0.7048   | 0.1852    | 0.0298   | +17.43***  p=< 0.0001
+  indeg_var      | 7.1462   | 2.7753    | 0.9018   | +4.85***  p=0.0001
+  outdeg_var     | 19.7018  | 2.7913    | 0.8993   | +18.80***  p=< 0.0001
+  mutual_dyads   | 18.0000  | 6.1173    | 2.0214   | +5.88***  p=< 0.0001
+
+  [Raw 2025 | conditioned on: Dyad Census]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.8304   | 0.8304    | 0.0000   | +0.00     p=1.0000
+  transitivity   | 0.7048   | 0.1821    | 0.0394   | +13.26***  p=< 0.0001
+  indeg_var      | 7.1462   | 2.7136    | 0.8743   | +5.07***  p=0.0003
+  outdeg_var     | 19.7018  | 2.7054    | 0.8776   | +19.37***  p=< 0.0001
+  mutual_dyads   | 18.0000  | 18.0000   | 0.0000   | +0.00     p=1.0000
+
+  [Raw 2024+2025 | conditioned on: Edges]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.7836   | 0.6500    | 0.0267   | +5.01***  p=< 0.0001
+  transitivity   | 0.6312   | 0.2210    | 0.0271   | +15.15***  p=< 0.0001
+  indeg_var      | 6.7193   | 3.1567    | 1.0183   | +3.50**   p=0.0052
+  outdeg_var     | 21.6082  | 3.1507    | 1.0130   | +18.22***  p=< 0.0001
+  mutual_dyads   | 20.0000  | 8.5929    | 2.2404   | +5.09***  p=< 0.0001
+
+  [Raw 2024+2025 | conditioned on: Dyad Census]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.7836   | 0.7836    | 0.0000   | +0.00     p=1.0000
+  transitivity   | 0.6312   | 0.2180    | 0.0332   | +12.45***  p=< 0.0001
+  indeg_var      | 6.7193   | 3.0811    | 0.9937   | +3.66**   p=0.0040
+  outdeg_var     | 21.6082  | 3.0915    | 0.9899   | +18.71***  p=< 0.0001
+  mutual_dyads   | 20.0000  | 20.0000   | 0.0000   | +0.00     p=1.0000
+
+  [Raw 2016-2025 | conditioned on: Edges]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.6550   | 0.5482    | 0.0344   | +3.10**   p=0.0031
+  transitivity   | 0.6735   | 0.3384    | 0.0204   | +16.43***  p=< 0.0001
+  indeg_var      | 7.3626   | 4.0651    | 1.3154   | +2.51*    p=0.0335
+  outdeg_var     | 34.5848  | 4.0922    | 1.3430   | +22.71***  p=< 0.0001
+  mutual_dyads   | 29.0000  | 19.8958   | 2.9223   | +3.12**   p=0.0027
+
+  [Raw 2016-2025 | conditioned on: Dyad Census]
+  Statistic      | Observed | Null Mean | Null SD  | z (sig) 
+  ---------------|----------|-----------|----------|----------
+  reciprocity    | 0.6550   | 0.6550    | 0.0000   | +0.00     p=1.0000
+  transitivity   | 0.6735   | 0.3372    | 0.0224   | +15.04***  p=< 0.0001
+  indeg_var      | 7.3626   | 4.0251    | 1.3183   | +2.53*    p=0.0344
+  outdeg_var     | 34.5848  | 4.0137    | 1.3185   | +23.19***  p=< 0.0001
+  mutual_dyads   | 29.0000  | 29.0000   | 0.0000   | +0.00     p=1.0000
+
+==================================================================================
+

@@ -1,65 +1,93 @@
+# Secrets and local config
+.env
+.env.*
+!.env.example
+OPENROUTER_API_KEY*
+GEMINI_API_KEY*
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
 build/
-develop-eggs/
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
 *.egg-info/
-.installed.cfg
-*.egg
 
 # Virtual environments
 venv/
+.venv/
 env/
 ENV/
 
-# Jupyter Notebook
-.ipynb_checkpoints
+# Node/local frontend dependencies
+node_modules/
 
-# IDEs
+# R local state
+.Rhistory
+.RData
+.Rproj.user/
+
+# IDE/OS
 .vscode/
 .idea/
+.DS_Store
+Thumbs.db
 *.swp
 *.swo
 *~
 
-# Data
-data/raw/*/
-data/metadata/*/
-
-# Keep directory structure but ignore contents
-!data/raw/.gitkeep
-!data/metadata/.gitkeep
-!data/logs/.gitkeep
-
-# Logs
-data/logs/*.log
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Scraped content (large files)
-*.pdf
-*.doc
-*.docx
-
-# Temporary files
+# Logs and temp files
+*.log
 *.tmp
 *.temp
+temp_*
+tmp*
+debug_*
+test_output.*
+cleanup_robocopy_preview*.log
+cleanup_robocopy_move.log
 
-# Environment variables
-.env
-.env.local
+# Local tool/cache/model folders
+marker-pdf/
+llm_models/
+.claude/
+
+# Restricted/proprietary COMPON data
+**/responses_FINAL.xlsx
+**/SURVEY_DATA_2025-FINAL.RData
+**/CZ2025_COLLABORATION_NET.xlsx
+data/external/COMPON_RESTRICTED/
+data/external/compon_local/
+data/compon_baseline/
+network_stuff/
+compon_orgs_temp.csv
+
+# Local-only setup notes (kept out of the public repo)
+SETUP_FOR_GITHUB_AND_ZENODO.md
+
+# Archived material
+_archive_unused_*/
+
+# Thesis data deposit
+# The full retained corpus, interim pipeline outputs, processed JSONL/DB
+# datasets, validation history, and network matrices are deposited on Zenodo
+# rather than committed to GitHub. Keep local copies in these paths after
+# downloading/extracting the Zenodo archive.
+data/raw/**
+data/interim/**
+data/processed/full_dataset/**
+data/processed/final_validation/**
+data/processed/network/**
+data/processed/validation_history/**
+data/processed/provenance/**
+
+# Keep data documentation, samples, and synthetic public test fixtures.
+!data/README.md
+!data/sample/
+!data/sample/**
+!data/external/
+!data/external/compon_synthetic/
+!data/external/compon_synthetic/**

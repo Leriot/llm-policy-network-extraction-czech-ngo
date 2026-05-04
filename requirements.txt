@@ -1,73 +1,25 @@
-# Core HTTP and Web Scraping
+# Runtime dependencies for the retained thesis replication pipeline.
+# PDF/OCR tooling and notebook/test/dev packages were removed because they are
+# not used by the final dataset or retained scripts.
+
+# Scraping and HTTP
 requests>=2.31.0
-httpx>=0.25.0
+urllib3>=2.0.0
+
+# HTML/text extraction
 beautifulsoup4>=4.12.0
-lxml>=4.9.0
+trafilatura>=1.8.0
+chardet>=5.2.0
 
-# PDF Processing
-pdfplumber>=0.9.0
-
-# OCR Processing (requires Tesseract to be installed on system)
-pytesseract>=0.3.10
-pdf2image>=1.16.0
-Pillow>=10.0.0
-
-# Configuration Management
+# Configuration and tabular data
 pyyaml>=6.0.1
 pandas>=2.1.0
 
-# URL Processing
-urllib3>=2.0.0
-
-# Progress Tracking
+# Filtering/progress helpers
+flashtext>=2.7
 tqdm>=4.66.0
+fuzzywuzzy>=0.18.0
+python-Levenshtein>=0.25.0
 
-# Pretty Tables
-tabulate>=0.9.0
-
-# Date/Time Parsing
-python-dateutil>=2.8.0
-
-# Character Encoding Detection
-chardet>=5.2.0
-
-# Content Type Detection
-python-magic>=0.4.27
-
-# Hashing for Deduplication
-xxhash>=3.4.0
-
-# Logging
-coloredlogs>=15.0.1
-
-# Data Storage
-jsonlines>=4.0.0
-
-# Named Entity Recognition
-gliner>=0.2.0
-
-# Optional: For JavaScript-heavy sites (uncomment if needed)
-# playwright>=1.40.0
-# selenium>=4.15.0
-
-# Optional: For scheduling (uncomment if needed)
-# schedule>=1.2.0
-# apscheduler>=3.10.0
-
-# Testing
-pytest>=7.4.0
-pytest-cov>=4.1.0
-responses>=0.24.0
-
-# Jupyter Notebooks
-jupyter>=1.0.0
-notebook>=7.0.0
-ipykernel>=6.25.0
-matplotlib>=3.8.0
-seaborn>=0.13.0
-networkx>=3.2.0
-
-# Development Tools
-black>=23.11.0
-flake8>=6.1.0
-mypy>=1.7.0
+# LLM validation scripts
+openai>=1.0.0

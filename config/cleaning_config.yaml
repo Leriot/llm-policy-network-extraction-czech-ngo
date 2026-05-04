@@ -1,0 +1,150 @@
+# Module 2: Content Extraction & Cleaning Configuration
+# =====================================================
+
+# Template Detection Thresholds
+# ------------------------------
+template_detection:
+  # Global threshold: Element must appear on this % of ALL pages to be considered global boilerplate
+  global_threshold: 0.80        # 80% (industry standard)
+
+  # Section threshold: Element must appear on this % of pages WITHIN a URL path group
+  section_threshold: 0.80       # 80% within section (e.g., all /aktuality/ pages)
+
+  # Minimum pages needed in a URL path group to detect section-specific templates
+  min_section_size: 10          # If <10 pages, skip section-specific detection
+
+  # Number of random pages to sample for global template detection
+  sample_size: 200              # Sample 200 pages across all sections
+
+  # URL path grouping depth (how many path segments to use for grouping)
+  # 1 = /aktuality/, 2 = /aktuality/clanky/, etc.
+  path_depth: 1
+
+
+# Extraction Methods
+# ------------------
+extraction:
+  # Primary extraction method: trafilatura (best for main content)
+  primary: "trafilatura"
+
+  # Fallback method: beautifulsoup (custom heuristics)
+  fallback: "beautifulsoup"
+
+  # Include tables in extracted content
+  include_tables: true
+
+  # Include image alt text in extracted content
+  include_images: false
+
+  # trafilatura-specific options
+  trafilatura_options:
+    no_fallback: false          # Allow trafilatura's internal fallbacks
+    include_comments: false     # Don't include comment sections
+    include_links: false        # Don't include link URLs in text
+    deduplicate: true           # Remove duplicate content within page
+
+
+# Deduplication Settings
+# ----------------------
+deduplication:
+  # Enable deduplication
+  enabled: true
+
+  # Jaccard similarity threshold (0.85 = 85% similar)
+  similarity_threshold: 0.85
+
+  # Shingle size for shingling algorithm (3-word sequences)
+  shingle_size: 3
+
+  # Keep one representative per cluster for validation
+  keep_representative: true
+
+
+# Output Settings
+# ---------------
+output:
+  # Output format: txt (plain text) or md (markdown)
+  format: "txt"
+
+  # Minimum word count (0 = no minimum, keep even single sentences)
+  min_word_count: 0
+
+  # Save metadata JSONL file
+  save_metadata: true
+
+  # Save template signatures for inspection
+  save_templates: true
+
+  # Save duplicate mapping
+  save_duplicates: true
+
+
+# Boilerplate Detection
+# ---------------------
+boilerplate:
+  # Terms indicating junk/boilerplate elements (class/id substrings)
+  # NOTE: Short terms like 'ad' cause false positives with Czech words
+  # (e.g., 'pripady' = cases, 'nadpis' = heading)
+  junk_terms:
+    - 'navigation'
+    - 'footer'
+    - 'sidebar'
+    - 'breadcrumb'
+    - 'pagination'
+    - 'widget'
+    - 'social-'
+    - 'share-'
+    - 'subscribe'
+    - 'newsletter'
+    - 'cookie'
+    - 'advertisement'
+    - 'ad-container'
+    - 'ad-wrapper'
+    - 'ads-'
+
+  # Terms indicating safe/content elements (class/id substrings)
+  # These elements will NOT be removed even if detected as templates
+  safe_terms:
+    - 'main'
+    - 'article'
+    - 'content'
+    - 'entry'
+    - 'post'
+    - 'body'
+    - 'text'
+    # Structural containers that hold content
+    - 'page'
+    - 'col-'
+    - 'pripady'
+    - 'detail'
+    - 'wrapper'
+    - 'container'
+    - 'inner'
+    # Single post/article pages
+    - 'single'
+
+  # HIGH PRIORITY content terms - these get picked FIRST before largest block
+  # Use specific class patterns that indicate actual article content
+  priority_content_terms:
+    - 'single-post'
+    - 'article-content'
+    - 'post-content'
+    - 'entry-content'
+    - 'page-content'
+    - 'main-content'
+
+  # Link density threshold (remove blocks where >60% of text is links)
+  link_density_threshold: 0.6
+
+
+# Logging
+# -------
+logging:
+  # Log level: DEBUG, INFO, WARNING, ERROR
+  level: "INFO"
+
+  # Save detailed logs for each NGO
+  save_logs: true
+
+  # Log file directory
+  log_dir: "data/logs"

@@ -1,0 +1,34 @@
+NOTICE
+======
+
+Copyright (c) 2026 Bc. Richard Janák.
+
+The code, configuration, documentation, and synthetic test data in this
+repository are released under the MIT License. See `LICENSE` for the
+full text.
+
+Some figures, tables, and reports under `outputs/` were generated from
+restricted COMPON (Comparing Climate Change Policy Networks) survey
+data. The underlying COMPON raw files and matrices are not part of this
+repository and are not covered by the MIT License.
+
+Specifically:
+
+- Code under `scripts/`, `modules/`, `config/`, `docs/` and the
+  synthetic COMPON matrix under `data/external/compon_synthetic/` are
+  MIT-licensed and may be reused freely.
+
+- Figures, tables, and statistical summaries in `outputs/` that
+  visualise or summarise real COMPON data (for example the
+  network-comparison report, QAP/MRQAP results, ERGM plots, and any
+  centrality or top-actor tables that include COMPON-derived columns)
+  are research outputs published under the author's COMPON data-use
+  agreement. They may be cited as part of the thesis and its
+  replication package, but the COMPON data values they encode are
+  not relicensed under MIT and may not be extracted and redistributed
+  as a standalone dataset.
+
+- Real COMPON raw data and the full 19×19 COMPON collaboration matrix
+  are excluded from this repository and from the Zenodo data deposit.
+  Researchers who need them must request access from the COMPON
+  project directly.

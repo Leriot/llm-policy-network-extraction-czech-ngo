@@ -1,0 +1,8 @@
+"network","top_indegree","top_outdegree","top_betweenness","top_authority","top_hub","n_isolates"
+"COMPON 2025","fct, ccc, foe, grn","ver, grp, cal, ccc","ver, cal, ccc, foe","fct, grn, lau, foe","grp, cal, ver, foe",0
+"LLM 2025","foe, grp, grn, arn","grp, grn, ccc, cde","grp, grn, arn, nes","foe, nes, bel, cal","cde, ccc, grp, grn",5
+"LLM 2024+2025","grn, foe, grp, arn","grp, grn, cde, ccc","grp, grn, arn, frb","foe, grn, grp, cal","grp, cde, grn, ccc",4
+"LLM 2016-2025","foe, grn, grp, arn","ccc, grn, grp, cde","grn, grp, arn, ccc","foe, cal, grp, fff","ccc, grn, grp, cde",2
+"Raw 2025","foe, grp, grn, arn","grp, ccc, grn, cde","grp, grn, arn, ccc","foe, grp, grn, nes","ccc, grp, cde, grn",5
+"Raw 2024+2025","grn, foe, grp, arn","grp, ccc, grn, cde","grn, grp, cal, arn","foe, grn, grp, cal","ccc, grp, grn, cde",2
+"Raw 2016-2025","grn, arn, foe, fff","ccc, grp, grn, cde","grn, arn, grp, ccc","fff, foe, cal, grn","ccc, grp, cde, grn",1

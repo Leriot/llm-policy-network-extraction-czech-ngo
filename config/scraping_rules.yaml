@@ -85,6 +85,12 @@ crawl:
   follow_external_links: false  # Only follow internal links
   respect_robots_txt: true  # Respects crawl-delay from robots.txt
 
+# Date Filtering (for 2025 data collection)
+date_filter:
+  enabled: true
+  start_date: "2025-01-01"  # January 1, 2025
+  end_date: "2025-12-31"    # December 31, 2025
+
 # Storage Settings
 storage:
   save_html: true

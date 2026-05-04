@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NGO Network Explorer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e0e0e0; height: 100vh; display: flex; flex-direction: column; }
+
+  header { padding: 12px 20px; background: #1a1d27; border-bottom: 1px solid #2a2d3a; display: flex; align-items: center; gap: 20px; flex-shrink: 0; }
+  header h1 { font-size: 15px; font-weight: 600; color: #fff; }
+  header span { font-size: 12px; color: #666; }
+  .tabs { display: flex; gap: 6px; margin-left: auto; }
+  .tab { padding: 6px 14px; border-radius: 6px; border: 1px solid #2a2d3a; background: transparent; color: #999; font-size: 12px; cursor: pointer; transition: all .15s; }
+  .tab:hover { border-color: #444; color: #ccc; }
+  .tab.active { color: #fff; font-weight: 600; }
+  .tab.collab.active  { background: #2563eb; border-color: #2563eb; }
+  .tab.comment.active { background: #c2410c; border-color: #c2410c; }
+  .tab.both.active    { background: #15803d; border-color: #15803d; }
+  .year-tabs { display: flex; gap: 4px; margin-left: 16px; padding-left: 16px; border-left: 1px solid #2a2d3a; }
+  .ytab { padding: 6px 12px; border-radius: 6px; border: 1px solid #2a2d3a; background: transparent; color: #999; font-size: 12px; cursor: pointer; transition: all .15s; }
+  .ytab:hover { border-color: #555; color: #ccc; }
+  .ytab.active { background: #44403c; border-color: #78716c; color: #fde68a; font-weight: 600; }
+
+  #main { flex: 1; display: flex; overflow: hidden; }
+  #canvas { flex: 1; position: relative; overflow: hidden; }
+  svg { width: 100%; height: 100%; }
+
+  /* Right panel */
+  #panel {
+    width: 220px; flex-shrink: 0; background: #1a1d27; border-left: 1px solid #2a2d3a;
+    overflow-y: auto; padding: 12px 0;
+  }
+  #panel h3 { font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase;
+    letter-spacing: 0.8px; padding: 0 14px 8px; border-bottom: 1px solid #2a2d3a; margin-bottom: 4px; }
+  .ngo-row { display: flex; align-items: center; gap: 8px; padding: 5px 14px;
+    cursor: default; border-radius: 0; transition: background .1s; }
+  .ngo-row:hover, .ngo-row.active { background: #252836; }
+  .ngo-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .ngo-code { font-size: 11px; font-weight: 700; color: #fff; width: 28px; flex-shrink: 0; font-family: monospace; }
+  .ngo-name { font-size: 11px; color: #aaa; line-height: 1.3; }
+
+  .node circle { stroke-width: 2; cursor: pointer; }
+  .node text { pointer-events: none; font-weight: 600; text-anchor: middle; dominant-baseline: hanging; }
+  .node:hover circle { stroke: #fff !important; stroke-width: 3 !important; }
+  .link { fill: none; stroke-linecap: round; }
+
+  #tooltip {
+    position: absolute; pointer-events: none; background: #1e2130; border: 1px solid #333;
+    border-radius: 8px; padding: 10px 14px; font-size: 12px; line-height: 1.7;
+    max-width: 260px; box-shadow: 0 4px 20px rgba(0,0,0,.6); display: none; z-index: 10;
+  }
+  #tooltip b { color: #fff; }
+  .badge { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 11px; margin-right: 3px; }
+  .badge.c  { background: #1e3a8a; color: #93c5fd; }
+  .badge.m  { background: #7c2d12; color: #fdba74; }
+  .badge.mx { background: #14532d; color: #86efac; }
+
+  #legend { position: absolute; bottom: 14px; left: 14px; background: #1a1d27dd;
+    border: 1px solid #2a2d3a; border-radius: 8px; padding: 10px 14px; font-size: 11px; line-height: 2; }
+  #legend .dot { display: inline-block; width: 22px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+  #stats { position: absolute; top: 10px; left: 14px; background: #1a1d27dd;
+    border: 1px solid #2a2d3a; border-radius: 8px; padding: 7px 12px; font-size: 11px; color: #888; line-height: 1.8; }
+  #stats b { color: #ddd; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1 id="header-title">Czech NGO Network — Total (2016–2025)</h1>
+  <span>Directed · edge thickness = evidence count</span>
+  <div class="tabs">
+    <button class="tab collab active"  onclick="setView('collab')">Collaboration</button>
+    <button class="tab comment"        onclick="setView('comment')">Co-mention</button>
+    <button class="tab both"           onclick="setView('both')">Combined</button>
+  </div>
+  <div class="year-tabs">
+    <button class="ytab active" onclick="setYear('total')">2016–2025</button>
+    <button class="ytab"        onclick="setYear('2025')">2025 only</button>
+  </div>
+</header>
+
+<div id="main">
+  <div id="canvas">
+    <svg id="svg"></svg>
+    <div id="tooltip"></div>
+    <div id="legend"></div>
+    <div id="stats"></div>
+  </div>
+  <div id="panel">
+    <h3>NGO Reference</h3>
+  </div>
+</div>
+
+<script>
+const EDGES_2025 = [{"src":"arn","tgt":"bel","collab":2,"comment":0,"total":2,"is_collab":1},{"src":"arn","tgt":"cal","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"arn","tgt":"cde","collab":0,"comment":1,"total":1,"is_collab":0},{"src":"arn","tgt":"upe","collab":1,"comment":1,"total":2,"is_collab":1},{"src":"arn","tgt":"grp","collab":2,"comment":5,"total":7,"is_collab":1},{"src":"arn","tgt":"foe","collab":3,"comment":6,"total":9,"is_collab":1},{"src":"arn","tgt":"nes","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"arn","tgt":"grn","collab":2,"comment":7,"total":9,"is_collab":1},{"src":"bel","tgt":"arn","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"cal","tgt":"arn","collab":0,"comment":2,"total":2,"is_collab":0},{"src":"cal","tgt":"grp","collab":0,"comment":1,"total":1,"is_collab":0},{"src":"cal","tgt":"foe","collab":0,"comment":2,"total":2,"is_collab":0},{"src":"cal","tgt":"grn","collab":0,"comment":2,"total":2,"is_collab":0},{"src":"cde","tgt":"arn","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"cde","tgt":"bel","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"cde","tgt":"cal","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"cde","tgt":"fct","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"cde","tgt":"grp","collab":5,"comment":0,"total":5,"is_collab":1},{"src":"cde","tgt":"foe","collab":4,"comment":2,"total":6,"is_collab":1},{"src":"cde","tgt":"ccc","collab":1,"comment":1,"total":2,"is_collab":1},{"src":"cde","tgt":"lau","collab":2,"comment":0,"total":2,"is_collab":1},{"src":"cde","tgt":"nes","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"cde","tgt":"grn","collab":4,"comment":1,"total":5,"is_collab":1},{"src":"frb","tgt":"grp","collab":5,"comment":0,"total":5,"is_collab":1},{"src":"frb","tgt":"foe","collab":4,"comment":0,"total":4,"is_collab":1},{"src":"grp","tgt":"arn","collab":1,"comment":2,"total":3,"is_collab":1},{"src":"grp","tgt":"bel","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"grp","tgt":"cal","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"grp","tgt":"cde","collab":1,"comment":1,"total":2,"is_collab":1},{"src":"grp","tgt":"frb","collab":5,"comment":3,"total":8,"is_collab":1},{"src":"grp","tgt":"fff","collab":4,"comment":0,"total":4,"is_collab":1},{"src":"grp","tgt":"foe","collab":11,"comment":10,"total":21,"is_collab":1},{"src":"grp","tgt":"ccc","collab":5,"comment":0,"total":5,"is_collab":1},{"src":"grp","tgt":"lau","collab":5,"comment":0,"total":5,"is_collab":1},{"src":"grp","tgt":"nes","collab":2,"comment":1,"total":3,"is_collab":1},{"src":"grp","tgt":"grn","collab":1,"comment":3,"total":4,"is_collab":1},{"src":"foe","tgt":"grn","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"ccc","tgt":"arn","collab":5,"comment":3,"total":8,"is_collab":1},{"src":"ccc","tgt":"bel","collab":2,"comment":0,"total":2,"is_collab":1},{"src":"ccc","tgt":"cal","collab":3,"comment":1,"total":4,"is_collab":1},{"src":"ccc","tgt":"cde","collab":1,"comment":2,"total":3,"is_collab":1},{"src":"ccc","tgt":"fct","collab":1,"comment":2,"total":3,"is_collab":1},{"src":"ccc","tgt":"frb","collab":0,"comment":1,"total":1,"is_collab":0},{"src":"ccc","tgt":"grp","collab":6,"comment":5,"total":11,"is_collab":1},{"src":"ccc","tgt":"foe","collab":9,"comment":8,"total":17,"is_collab":1},{"src":"ccc","tgt":"lau","collab":2,"comment":0,"total":2,"is_collab":1},{"src":"ccc","tgt":"nes","collab":4,"comment":3,"total":7,"is_collab":1},{"src":"ccc","tgt":"grn","collab":11,"comment":1,"total":12,"is_collab":1},{"src":"nes","tgt":"upe","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"nes","tgt":"fff","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"nes","tgt":"grp","collab":1,"comment":1,"total":2,"is_collab":1},{"src":"nes","tgt":"foe","collab":1,"comment":1,"total":2,"is_collab":1},{"src":"nes","tgt":"ccc","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"nes","tgt":"lau","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"nes","tgt":"grn","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"grn","tgt":"arn","collab":9,"comment":12,"total":21,"is_collab":1},{"src":"grn","tgt":"bel","collab":3,"comment":0,"total":3,"is_collab":1},{"src":"grn","tgt":"cal","collab":3,"comment":1,"total":4,"is_collab":1},{"src":"grn","tgt":"cde","collab":2,"comment":3,"total":5,"is_collab":1},{"src":"grn","tgt":"upe","collab":1,"comment":1,"total":2,"is_collab":1},{"src":"grn","tgt":"grp","collab":6,"comment":6,"total":12,"is_collab":1},{"src":"grn","tgt":"foe","collab":9,"comment":11,"total":20,"is_collab":1},{"src":"grn","tgt":"ccc","collab":5,"comment":0,"total":5,"is_collab":1},{"src":"grn","tgt":"lau","collab":2,"comment":0,"total":2,"is_collab":1},{"src":"grn","tgt":"nes","collab":3,"comment":0,"total":3,"is_collab":1}];
+
+const RAW_NODES =[{"id":"aes","label":"Aliance pro energetickou sobestacnost"},{"id":"arn","label":"Arnika"},{"id":"aut","label":"Autoklub CR"},{"id":"bel","label":"Beleco"},{"id":"cal","label":"Calla - Sdruzeni pro zachranu prostredi"},{"id":"ccc","label":"Klimaticka koalice"},{"id":"cde","label":"Centrum pro dopravu a energetiku"},{"id":"cit","label":"CI2"},{"id":"ext","label":"Extinction Rebellion [Posledni generace]"},{"id":"fct","label":"Fakta o klimatu"},{"id":"fff","label":"Fridays for Future"},{"id":"foe","label":"Hnuti Duha"},{"id":"frb","label":"Frank Bold"},{"id":"grn","label":"Zeleny kruh"},{"id":"grp","label":"Greenpeace CR"},{"id":"lau","label":"Limity jsme my"},{"id":"nes","label":"Nesehnuti"},{"id":"upe","label":"Cesky svaz ochrancu prirody"},{"id":"ver","label":"Ekologicky institut Veronica"}];
+const RAW_EDGES = [{"src":"arn","tgt":"bel","collab":2,"comment":2,"total":4,"is_collab":1},{"src":"arn","tgt":"cal","collab":2,"comment":3,"total":5,"is_collab":1},{"src":"arn","tgt":"cde","collab":1,"comment":1,"total":2,"is_collab":1},{"src":"arn","tgt":"upe","collab":23,"comment":3,"total":26,"is_collab":1},{"src":"arn","tgt":"ext","collab":0,"comment":1,"total":1,"is_collab":0},{"src":"arn","tgt":"frb","collab":0,"comment":9,"total":9,"is_collab":0},{"src":"arn","tgt":"fff","collab":1,"comment":3,"total":4,"is_collab":1},{"src":"arn","tgt":"grp","collab":11,"comment":13,"total":24,"is_collab":1},{"src":"arn","tgt":"foe","collab":11,"comment":20,"total":31,"is_collab":1},{"src":"arn","tgt":"lau","collab":2,"comment":1,"total":3,"is_collab":1},{"src":"arn","tgt":"nes","collab":21,"comment":2,"total":23,"is_collab":1},{"src":"arn","tgt":"grn","collab":35,"comment":32,"total":67,"is_collab":1},{"src":"bel","tgt":"arn","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"cit","tgt":"arn","collab":1,"comment":1,"total":2,"is_collab":1},{"src":"cit","tgt":"cal","collab":0,"comment":2,"total":2,"is_collab":0},{"src":"cit","tgt":"ver","collab":1,"comment":1,"total":2,"is_collab":1},{"src":"cit","tgt":"ext","collab":0,"comment":2,"total":2,"is_collab":0},{"src":"cit","tgt":"fff","collab":0,"comment":2,"total":2,"is_collab":0},{"src":"cit","tgt":"ccc","collab":2,"comment":0,"total":2,"is_collab":1},{"src":"cit","tgt":"lau","collab":0,"comment":2,"total":2,"is_collab":0},{"src":"cal","tgt":"arn","collab":0,"comment":3,"total":3,"is_collab":0},{"src":"cal","tgt":"aut","collab":0,"comment":1,"total":1,"is_collab":0},{"src":"cal","tgt":"ver","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"cal","tgt":"fct","collab":0,"comment":1,"total":1,"is_collab":0},{"src":"cal","tgt":"frb","collab":3,"comment":0,"total":3,"is_collab":1},{"src":"cal","tgt":"grp","collab":2,"comment":4,"total":6,"is_collab":1},{"src":"cal","tgt":"foe","collab":14,"comment":6,"total":20,"is_collab":1},{"src":"cal","tgt":"grn","collab":4,"comment":4,"total":8,"is_collab":1},{"src":"cde","tgt":"arn","collab":2,"comment":3,"total":5,"is_collab":1},{"src":"cde","tgt":"bel","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"cde","tgt":"cal","collab":7,"comment":34,"total":41,"is_collab":1},{"src":"cde","tgt":"upe","collab":0,"comment":2,"total":2,"is_collab":0},{"src":"cde","tgt":"ext","collab":0,"comment":2,"total":2,"is_collab":0},{"src":"cde","tgt":"fct","collab":4,"comment":8,"total":12,"is_collab":1},{"src":"cde","tgt":"frb","collab":2,"comment":8,"total":10,"is_collab":1},{"src":"cde","tgt":"fff","collab":9,"comment":3,"total":12,"is_collab":1},{"src":"cde","tgt":"grp","collab":44,"comment":72,"total":116,"is_collab":1},{"src":"cde","tgt":"foe","collab":46,"comment":87,"total":133,"is_collab":1},{"src":"cde","tgt":"ccc","collab":19,"comment":56,"total":75,"is_collab":1},{"src":"cde","tgt":"lau","collab":10,"comment":5,"total":15,"is_collab":1},{"src":"cde","tgt":"nes","collab":2,"comment":3,"total":5,"is_collab":1},{"src":"cde","tgt":"grn","collab":16,"comment":21,"total":37,"is_collab":1},{"src":"upe","tgt":"arn","collab":0,"comment":1,"total":1,"is_collab":0},{"src":"upe","tgt":"foe","collab":1,"comment":2,"total":3,"is_collab":1},{"src":"upe","tgt":"grn","collab":2,"comment":1,"total":3,"is_collab":1},{"src":"ver","tgt":"upe","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"ver","tgt":"fff","collab":0,"comment":1,"total":1,"is_collab":0},{"src":"ver","tgt":"ccc","collab":0,"comment":1,"total":1,"is_collab":0},{"src":"ver","tgt":"grn","collab":0,"comment":2,"total":2,"is_collab":0},{"src":"fct","tgt":"frb","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"frb","tgt":"cde","collab":2,"comment":0,"total":2,"is_collab":1},{"src":"frb","tgt":"grp","collab":8,"comment":5,"total":13,"is_collab":1},{"src":"frb","tgt":"foe","collab":6,"comment":4,"total":10,"is_collab":1},{"src":"frb","tgt":"grn","collab":0,"comment":1,"total":1,"is_collab":0},{"src":"grp","tgt":"arn","collab":7,"comment":17,"total":24,"is_collab":1},{"src":"grp","tgt":"bel","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"grp","tgt":"cal","collab":4,"comment":34,"total":38,"is_collab":1},{"src":"grp","tgt":"cde","collab":16,"comment":17,"total":33,"is_collab":1},{"src":"grp","tgt":"upe","collab":0,"comment":3,"total":3,"is_collab":0},{"src":"grp","tgt":"ver","collab":0,"comment":1,"total":1,"is_collab":0},{"src":"grp","tgt":"ext","collab":1,"comment":5,"total":6,"is_collab":1},{"src":"grp","tgt":"fct","collab":3,"comment":9,"total":12,"is_collab":1},{"src":"grp","tgt":"frb","collab":27,"comment":35,"total":62,"is_collab":1},{"src":"grp","tgt":"fff","collab":8,"comment":32,"total":40,"is_collab":1},{"src":"grp","tgt":"foe","collab":81,"comment":171,"total":252,"is_collab":1},{"src":"grp","tgt":"ccc","collab":14,"comment":72,"total":86,"is_collab":1},{"src":"grp","tgt":"lau","collab":16,"comment":23,"total":39,"is_collab":1},{"src":"grp","tgt":"nes","collab":4,"comment":4,"total":8,"is_collab":1},{"src":"grp","tgt":"grn","collab":16,"comment":55,"total":71,"is_collab":1},{"src":"foe","tgt":"aut","collab":0,"comment":2,"total":2,"is_collab":0},{"src":"foe","tgt":"cal","collab":1,"comment":1,"total":2,"is_collab":1},{"src":"foe","tgt":"cde","collab":2,"comment":0,"total":2,"is_collab":1},{"src":"foe","tgt":"fff","collab":0,"comment":1,"total":1,"is_collab":0},{"src":"foe","tgt":"grp","collab":1,"comment":1,"total":2,"is_collab":1},{"src":"foe","tgt":"ccc","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"foe","tgt":"grn","collab":2,"comment":0,"total":2,"is_collab":1},{"src":"ccc","tgt":"arn","collab":8,"comment":15,"total":23,"is_collab":1},{"src":"ccc","tgt":"bel","collab":4,"comment":3,"total":7,"is_collab":1},{"src":"ccc","tgt":"cit","collab":1,"comment":10,"total":11,"is_collab":1},{"src":"ccc","tgt":"cal","collab":20,"comment":37,"total":57,"is_collab":1},{"src":"ccc","tgt":"cde","collab":36,"comment":66,"total":102,"is_collab":1},{"src":"ccc","tgt":"upe","collab":2,"comment":5,"total":7,"is_collab":1},{"src":"ccc","tgt":"ver","collab":0,"comment":2,"total":2,"is_collab":0},{"src":"ccc","tgt":"ext","collab":1,"comment":17,"total":18,"is_collab":1},{"src":"ccc","tgt":"fct","collab":2,"comment":14,"total":16,"is_collab":1},{"src":"ccc","tgt":"frb","collab":2,"comment":18,"total":20,"is_collab":1},{"src":"ccc","tgt":"fff","collab":8,"comment":41,"total":49,"is_collab":1},{"src":"ccc","tgt":"grp","collab":69,"comment":106,"total":175,"is_collab":1},{"src":"ccc","tgt":"foe","collab":71,"comment":142,"total":213,"is_collab":1},{"src":"ccc","tgt":"lau","collab":10,"comment":26,"total":36,"is_collab":1},{"src":"ccc","tgt":"nes","collab":5,"comment":17,"total":22,"is_collab":1},{"src":"ccc","tgt":"grn","collab":70,"comment":26,"total":96,"is_collab":1},{"src":"nes","tgt":"arn","collab":3,"comment":2,"total":5,"is_collab":1},{"src":"nes","tgt":"cal","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"nes","tgt":"upe","collab":1,"comment":1,"total":2,"is_collab":1},{"src":"nes","tgt":"ext","collab":1,"comment":1,"total":2,"is_collab":1},{"src":"nes","tgt":"frb","collab":0,"comment":1,"total":1,"is_collab":0},{"src":"nes","tgt":"fff","collab":1,"comment":0,"total":1,"is_collab":1},{"src":"nes","tgt":"grp","collab":2,"comment":2,"total":4,"is_collab":1},{"src":"nes","tgt":"foe","collab":5,"comment":10,"total":15,"is_collab":1},{"src":"nes","tgt":"ccc","collab":1,"comment":1,"total":2,"is_collab":1},{"src":"nes","tgt":"lau","collab":1,"comment":3,"total":4,"is_collab":1},{"src":"nes","tgt":"grn","collab":2,"comment":4,"total":6,"is_collab":1},{"src":"grn","tgt":"arn","collab":46,"comment":49,"total":95,"is_collab":1},{"src":"grn","tgt":"bel","collab":8,"comment":13,"total":21,"is_collab":1},{"src":"grn","tgt":"cit","collab":2,"comment":4,"total":6,"is_collab":1},{"src":"grn","tgt":"cal","collab":17,"comment":53,"total":70,"is_collab":1},{"src":"grn","tgt":"cde","collab":13,"comment":13,"total":26,"is_collab":1},{"src":"grn","tgt":"upe","collab":2,"comment":4,"total":6,"is_collab":1},{"src":"grn","tgt":"fct","collab":0,"comment":2,"total":2,"is_collab":0},{"src":"grn","tgt":"frb","collab":12,"comment":18,"total":30,"is_collab":1},{"src":"grn","tgt":"fff","collab":2,"comment":2,"total":4,"is_collab":1},{"src":"grn","tgt":"grp","collab":42,"comment":52,"total":94,"is_collab":1},{"src":"grn","tgt":"foe","collab":87,"comment":94,"total":181,"is_collab":1},{"src":"grn","tgt":"ccc","collab":35,"comment":12,"total":47,"is_collab":1},{"src":"grn","tgt":"lau","collab":5,"comment":2,"total":7,"is_collab":1},{"src":"grn","tgt":"nes","collab":7,"comment":18,"total":25,"is_collab":1}];
+
+const COLORS = { collab: '#3b82f6', comment: '#f97316', mixed: '#22c55e' };
+
+// Distinct colour per node — grouped by type of org
+const NODE_COLOR = {
+  grp: '#ef4444',  // Greenpeace       — red
+  foe: '#f97316',  // Hnuti Duha       — orange
+  ccc: '#eab308',  // Klimaticka koalice — yellow (easy to spot)
+  grn: '#22c55e',  // Zeleny kruh      — green
+  cde: '#06b6d4',  // CDE              — cyan
+  arn: '#3b82f6',  // Arnika           — blue
+  cal: '#818cf8',  // Calla            — indigo
+  frb: '#a78bfa',  // Frank Bold       — violet
+  nes: '#f472b6',  // Nesehnuti        — pink
+  cit: '#34d399',  // CI2              — emerald
+  ver: '#2dd4bf',  // Veronica         — teal
+  fct: '#fb923c',  // Fakta o klimatu  — orange-light
+  fff: '#facc15',  // FFF              — yellow-light
+  ext: '#f87171',  // Ext Rebellion    — red-light
+  lau: '#86efac',  // Limity jsme my   — green-light
+  bel: '#93c5fd',  // Beleco           — blue-light
+  upe: '#c4b5fd',  // CSOP             — purple-light
+  aut: '#94a3b8',  // Autoklub         — slate
+  aes: '#64748b',  // AliES            — slate-dark
+};
+
+// Full names for panel
+const NGO_FULL = {
+  aes: 'Aliance pro energetickou sobestacnost',
+  arn: 'Arnika',
+  aut: 'Autoklub CR',
+  bel: 'Beleco',
+  cal: 'Calla - Sdruzeni pro zachranu prostredi',
+  ccc: 'Klimaticka koalice',
+  cde: 'Centrum pro dopravu a energetiku',
+  cit: 'CI2',
+  ext: 'Extinction Rebellion / Posledni generace',
+  fct: 'Fakta o klimatu',
+  fff: 'Fridays for Future',
+  foe: 'Hnuti Duha',
+  frb: 'Frank Bold',
+  grn: 'Zeleny kruh',
+  grp: 'Greenpeace CR',
+  lau: 'Limity jsme my',
+  nes: 'Nesehnuti',
+  upe: 'Cesky svaz ochrancu prirody',
+  ver: 'Ekologicky institut Veronica',
+};
+
+function buildPanel() {
+  const panel = document.getElementById('panel');
+  // keep header, remove old rows
+  panel.querySelectorAll('.ngo-row').forEach(r => r.remove());
+  Object.entries(NGO_FULL).sort((a,b) => a[0].localeCompare(b[0])).forEach(([code, name]) => {
+    const row = document.createElement('div');
+    row.className = 'ngo-row';
+    row.id = `row-${code}`;
+    row.innerHTML = `<span class="ngo-dot" style="background:${NODE_COLOR[code]||'#666'}"></span>
+      <span class="ngo-code">${code}</span>
+      <span class="ngo-name">${name}</span>`;
+    panel.appendChild(row);
+  });
+}
+
+let currentView = 'collab';
+let currentYear = 'total';
+let simulation, svg, linkGroup, nodeGroup;
+let width, height;
+
+function getSourceEdges() {
+  return currentYear === '2025' ? EDGES_2025 : RAW_EDGES;
+}
+
+function getViewEdges(view) {
+  const src = getSourceEdges();
+  if (view === 'collab')  return src.filter(e => e.is_collab === 1);
+  if (view === 'comment') return src.filter(e => e.comment > 0);
+  return src; // both
+}
+
+function setYear(y) {
+  currentYear = y;
+  document.querySelectorAll('.ytab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.ytab[onclick="setYear('${y}')"]`).classList.add('active');
+  const title = y === '2025'
+    ? 'Czech NGO Network — 2025 only'
+    : 'Czech NGO Network — Total (2016–2025)';
+  document.getElementById('header-title').textContent = title;
+  if (simulation) simulation.stop();
+  draw(currentView);
+}
+
+function edgeColor(e, view) {
+  if (view === 'collab')  return COLORS.collab;
+  if (view === 'comment') return COLORS.comment;
+  // combined: colour by dominant signal
+  if (e.is_collab && e.comment > 0) return COLORS.mixed;
+  if (e.is_collab) return COLORS.collab;
+  return COLORS.comment;
+}
+
+function edgeWeight(e, view) {
+  const v = view === 'collab'  ? e.collab
+          : view === 'comment' ? e.comment
+          : e.total;
+  return Math.max(1, Math.log2(v + 1) * 1.2);
+}
+
+function getActiveNodes(edges) {
+  const ids = new Set();
+  edges.forEach(e => { ids.add(e.src); ids.add(e.tgt); });
+  return RAW_NODES.filter(n => ids.has(n.id));
+}
+
+function nodeDegree(id, edges) {
+  return edges.filter(e => e.src === id || e.tgt === id).length;
+}
+
+function draw(view) {
+  currentView = view;
+  const svgEl = document.getElementById('svg');
+  svgEl.innerHTML = '';
+  width  = svgEl.clientWidth;
+  height = svgEl.clientHeight;
+
+  const rawEdges = getViewEdges(view);
+  // Always show ALL 19 nodes, even isolated ones
+  const nodes   = RAW_NODES.map(n => ({ ...n }));
+  const nodeMap = {};
+  nodes.forEach(n => nodeMap[n.id] = n);
+
+  const edges = rawEdges
+    .filter(e => nodeMap[e.src] && nodeMap[e.tgt])
+    .map(e => ({ ...e, source: e.src, target: e.tgt }));
+
+  // Stats
+  const yearLabel = currentYear === '2025' ? '2025' : '2016–2025';
+  document.getElementById('stats').innerHTML =
+    `<b>${nodes.length}</b> nodes &nbsp;·&nbsp; <b>${edges.length}</b> edges &nbsp;·&nbsp; <span style="color:#fde68a">${yearLabel}</span><br>` +
+    (view === 'both'
+      ? `<span style="color:#3b82f6">■</span> collab &nbsp;<span style="color:#f97316">■</span> co-mention &nbsp;<span style="color:#22c55e">■</span> mixed`
+      : '');
+
+  svg = d3.select('#svg');
+  const g = svg.append('g');
+
+  // Zoom
+  svg.call(d3.zoom().scaleExtent([0.3, 4]).on('zoom', e => g.attr('transform', e.transform)));
+
+  // Arrow markers
+  ['collab','comment','mixed'].forEach(type => {
+    svg.append('defs').append('marker')
+      .attr('id', `arrow-${type}`)
+      .attr('viewBox', '0 -4 8 8').attr('refX', 18).attr('refY', 0)
+      .attr('markerWidth', 5).attr('markerHeight', 5).attr('orient', 'auto')
+      .append('path').attr('d', 'M0,-4L8,0L0,4').attr('fill',
+        type === 'collab' ? COLORS.collab : type === 'comment' ? COLORS.comment : COLORS.mixed);
+  });
+
+  // Links
+  linkGroup = g.selectAll('.link')
+    .data(edges).enter().append('path')
+    .attr('class', 'link')
+    .attr('stroke', e => edgeColor(e, view))
+    .attr('stroke-width', e => edgeWeight(e, view))
+    .attr('stroke-opacity', 0.65)
+    .attr('marker-end', e => {
+      const t = view === 'both' ? (e.is_collab && e.comment > 0 ? 'mixed' : e.is_collab ? 'collab' : 'comment') : view === 'collab' ? 'collab' : 'comment';
+      return `url(#arrow-${t})`;
+    })
+    .on('mouseover', function(event, e) {
+      d3.select(this).attr('stroke-opacity', 1).attr('stroke-width', d => edgeWeight(d, view) + 1.5);
+      const tt = document.getElementById('tooltip');
+      const typeLabel = e.is_collab && e.comment > 0 ? '<span class="badge mx">mixed</span>'
+                      : e.is_collab ? '<span class="badge c">collaboration</span>'
+                      : '<span class="badge m">co-mention</span>';
+      tt.innerHTML = `<b>${e.src} → ${e.tgt}</b><br>${typeLabel}<br>
+        <span style="color:#3b82f6">● collab:</span> ${e.collab} &nbsp;
+        <span style="color:#f97316">● co-mention:</span> ${e.comment} &nbsp;
+        <span style="color:#888">total:</span> ${e.total}`;
+      tt.style.display = 'block';
+      tt.style.left = (event.pageX + 12) + 'px';
+      tt.style.top  = (event.pageY - 10) + 'px';
+    })
+    .on('mousemove', function(event) {
+      const tt = document.getElementById('tooltip');
+      tt.style.left = (event.pageX + 12) + 'px';
+      tt.style.top  = (event.pageY - 10) + 'px';
+    })
+    .on('mouseout', function() {
+      d3.select(this).attr('stroke-opacity', 0.65).attr('stroke-width', e => edgeWeight(e, view));
+      document.getElementById('tooltip').style.display = 'none';
+    });
+
+  // Curved paths for bidirectional pairs
+  const pairSet = new Set(edges.map(e => [e.src, e.tgt].sort().join('|')));
+  const bidir   = new Set();
+  pairSet.forEach(p => {
+    const [a, b] = p.split('|');
+    if (edges.find(e => e.src===a && e.tgt===b) && edges.find(e => e.src===b && e.tgt===a))
+      bidir.add(p);
+  });
+
+  // Nodes — seed positions in a circle so simulation starts already spread
+  const maxDeg = d3.max(nodes, n => nodeDegree(n.id, edges)) || 1;
+  const rScale = d3.scaleSqrt().domain([0, maxDeg]).range([8, 24]);
+  const initR  = Math.min(width, height) * 0.38;
+  nodes.forEach((n, i) => {
+    const angle = (i / nodes.length) * 2 * Math.PI;
+    n.x = width  / 2 + initR * Math.cos(angle);
+    n.y = height / 2 + initR * Math.sin(angle);
+  });
+
+  nodeGroup = g.selectAll('.node')
+    .data(nodes).enter().append('g').attr('class', 'node')
+    .call(d3.drag()
+      .on('start', (e, d) => { if (!e.active) simulation.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+      .on('drag',  (e, d) => { d.fx = e.x; d.fy = e.y; })
+      .on('end',   (e, d) => { if (!e.active) simulation.alphaTarget(0); d.fx = null; d.fy = null; }))
+    .on('mouseover', function(event, d) {
+      const deg = nodeDegree(d.id, edges);
+      const out = edges.filter(e => e.src === d.id).length;
+      const inn = edges.filter(e => e.tgt === d.id).length;
+      const tt = document.getElementById('tooltip');
+      tt.innerHTML = `<b style="color:${NODE_COLOR[d.id]}">${NGO_FULL[d.id]||d.id}</b>
+        <span style="color:#555"> · ${d.id}</span><br>
+        degree: <b>${deg}</b> &nbsp;·&nbsp; out: <b>${out}</b> &nbsp;·&nbsp; in: <b>${inn}</b>`;
+      tt.style.display = 'block';
+      tt.style.left = (event.pageX + 14) + 'px';
+      tt.style.top  = (event.pageY - 10) + 'px';
+      // highlight panel row
+      document.querySelectorAll('.ngo-row').forEach(r => r.classList.remove('active'));
+      const row = document.getElementById(`row-${d.id}`);
+      if (row) { row.classList.add('active'); row.scrollIntoView({ block: 'nearest' }); }
+    })
+    .on('mousemove', function(event) {
+      const tt = document.getElementById('tooltip');
+      tt.style.left = (event.pageX + 14) + 'px';
+      tt.style.top  = (event.pageY - 10) + 'px';
+    })
+    .on('mouseout', () => {
+      document.getElementById('tooltip').style.display = 'none';
+      document.querySelectorAll('.ngo-row').forEach(r => r.classList.remove('active'));
+    });
+
+  nodeGroup.append('circle')
+    .attr('r', d => rScale(nodeDegree(d.id, edges)))
+    .attr('fill', d => NODE_COLOR[d.id] || '#64748b')
+    .attr('fill-opacity', 0.9)
+    .attr('stroke', '#0f1117')
+    .attr('stroke-width', 2);
+
+  // Code label inside/below circle
+  nodeGroup.append('text')
+    .attr('dy', d => rScale(nodeDegree(d.id, edges)) + 14)
+    .style('font-size', '11px')
+    .style('fill', d => NODE_COLOR[d.id] || '#aaa')
+    .text(d => d.id);
+
+  // Simulation — strong repulsion + long links to spread graph out
+  simulation = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(edges).id(d => d.id)
+      .distance(d => 160 + edgeWeight(d, view) * 12)
+      .strength(0.4))
+    .force('charge', d3.forceManyBody().strength(-1300).distanceMax(700))
+    .force('center', d3.forceCenter(width / 2, height / 2).strength(0.04))
+    .force('collision', d3.forceCollide().radius(d => rScale(nodeDegree(d.id, edges)) + 36))
+    .force('x', d3.forceX(width  / 2).strength(0.02))
+    .force('y', d3.forceY(height / 2).strength(0.02))
+    .alphaDecay(0.025)
+    .on('tick', () => {
+      linkGroup.attr('d', d => {
+        const pair = [d.src, d.tgt].sort().join('|');
+        const isBi = bidir.has(pair);
+        const sx = d.source.x, sy = d.source.y;
+        const tx = d.target.x, ty = d.target.y;
+        if (!isBi) return `M${sx},${sy}L${tx},${ty}`;
+        const dx = tx - sx, dy = ty - sy;
+        const dr = Math.sqrt(dx*dx + dy*dy) * 1.3;
+        return `M${sx},${sy}A${dr},${dr} 0 0,1 ${tx},${ty}`;
+      });
+      nodeGroup.attr('transform', d => `translate(${d.x},${d.y})`);
+    });
+
+  // Legend
+  const legendLines = view === 'collab'
+    ? [`<span class="dot" style="background:${COLORS.collab}"></span> Collaboration edge`]
+    : view === 'comment'
+    ? [`<span class="dot" style="background:${COLORS.comment}"></span> Co-mention edge`]
+    : [
+        `<span class="dot" style="background:${COLORS.collab}"></span> Collaboration only`,
+        `<span class="dot" style="background:${COLORS.comment}"></span> Co-mention only`,
+        `<span class="dot" style="background:${COLORS.mixed}"></span> Both (same pair)`,
+      ];
+  legendLines.push('<span style="color:#666">Edge thickness = evidence count</span>');
+  legendLines.push('<span style="color:#666">Node size = degree &nbsp;·&nbsp; drag to rearrange</span>');
+  document.getElementById('legend').innerHTML = legendLines.join('<br>');
+}
+
+function setView(v) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.tab.${v}`).classList.add('active');
+  if (simulation) simulation.stop();
+  draw(v);
+}
+
+window.addEventListener('resize', () => {
+  if (simulation) simulation.stop();
+  draw(currentView);
+});
+
+buildPanel();
+draw('collab');
+</script>
+</body>
+</html>
