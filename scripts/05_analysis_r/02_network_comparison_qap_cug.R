@@ -1907,4 +1907,136 @@ export_master_report <- function(filepath) {
 
 export_master_report("Master_Network_Comparisons_v3.txt")
 
+cat("\n##############################################################\n")
+cat("# EXTRA: SPECIALIST BRIDGING TESTS                                 #\n")
+cat("##############################################################\n\n")
+
+make_bridging_df <- function(mat, label) {
+  g <- igraph::graph_from_adjacency_matrix(mat, mode = "directed", diag = FALSE)
+  igraph::V(g)$name <- colnames(mat)
+
+  node <- colnames(mat)
+  category <- cat_labels[node]
+
+  indegree  <- colSums(mat)
+  outdegree <- rowSums(mat)
+  total_degree <- indegree + outdegree
+
+  betweenness <- igraph::betweenness(g, directed = TRUE, normalized = TRUE)
+
+  max_degree <- max(total_degree, na.rm = TRUE)
+  broker_idx <- ifelse(total_degree > 0 & max_degree > 0,
+                       betweenness / (total_degree / max_degree),
+                       NA)
+
+  cross_ties <- sapply(seq_along(node), function(i) {
+    other_cat <- category != category[i]
+    out_cross <- sum(mat[i, other_cat], na.rm = TRUE)
+    in_cross  <- sum(mat[other_cat, i], na.rm = TRUE)
+    out_cross + in_cross
+  })
+
+  cross_share <- ifelse(total_degree > 0, cross_ties / total_degree, NA)
+
+  data.frame(
+    network = label,
+    node = node,
+    category = category,
+    specialist = category == "specialist",
+    indegree = indegree,
+    outdegree = outdegree,
+    total_degree = total_degree,
+    betweenness = betweenness,
+    broker_idx = broker_idx,
+    cross_ties = cross_ties,
+    cross_share = cross_share,
+    stringsAsFactors = FALSE
+  )
+}
+
+safe_wilcox_specialist_greater <- function(df, metric) {
+  x <- df[df$specialist, metric]
+  y <- df[!df$specialist, metric]
+
+  x <- x[!is.na(x)]
+  y <- y[!is.na(y)]
+
+  if (length(x) < 2 || length(y) < 2 || length(unique(c(x, y))) < 2) {
+    return(data.frame(
+      metric = metric,
+      specialist_mean = mean(x, na.rm = TRUE),
+      other_mean = mean(y, na.rm = TRUE),
+      specialist_median = median(x, na.rm = TRUE),
+      other_median = median(y, na.rm = TRUE),
+      W = NA,
+      p_value = NA
+    ))
+  }
+
+  wt <- wilcox.test(x, y, alternative = "greater", exact = FALSE)
+
+  data.frame(
+    metric = metric,
+    specialist_mean = mean(x, na.rm = TRUE),
+    other_mean = mean(y, na.rm = TRUE),
+    specialist_median = median(x, na.rm = TRUE),
+    other_median = median(y, na.rm = TRUE),
+    W = as.numeric(wt$statistic),
+    p_value = wt$p.value
+  )
+}
+
+run_specialist_bridging_tests <- function(mat, label) {
+  df <- make_bridging_df(mat, label)
+
+  cat("\n==============================================================\n")
+  cat("SPECIALIST BRIDGING TEST:", label, "\n")
+  cat("==============================================================\n\n")
+
+  cat("Specialist nodes:\n")
+  spec_tbl <- df[df$specialist, c(
+    "node", "category", "indegree", "outdegree", "total_degree",
+    "betweenness", "broker_idx", "cross_ties", "cross_share"
+  )]
+  spec_tbl$betweenness_rank <- rank(-df$betweenness, ties.method = "min")[df$specialist]
+  spec_tbl$broker_rank <- rank(-df$broker_idx, ties.method = "min", na.last = "keep")[df$specialist]
+  spec_tbl$cross_ties_rank <- rank(-df$cross_ties, ties.method = "min")[df$specialist]
+  print(spec_tbl, row.names = FALSE)
+
+  cat("\nTop 10 nodes by betweenness:\n")
+  top_b <- df[order(-df$betweenness), c(
+    "node", "category", "betweenness", "broker_idx", "cross_ties", "cross_share", "total_degree"
+  )]
+  print(head(top_b, 10), row.names = FALSE)
+
+  cat("\nGroup means: specialists vs non-specialists\n")
+  group_summary <- aggregate(
+    cbind(betweenness, broker_idx, cross_ties, cross_share, total_degree, indegree, outdegree) ~ specialist,
+    data = df,
+    FUN = mean,
+    na.rm = TRUE
+  )
+  print(group_summary, row.names = FALSE)
+
+  cat("\nOne-sided Wilcoxon tests, specialist > non-specialist:\n")
+  tests <- do.call(rbind, lapply(
+    c("betweenness", "broker_idx", "cross_ties", "cross_share", "total_degree", "indegree", "outdegree"),
+    function(metric) safe_wilcox_specialist_greater(df, metric)
+  ))
+  tests[, c("specialist_mean", "other_mean", "specialist_median", "other_median", "p_value")] <-
+    round(tests[, c("specialist_mean", "other_mean", "specialist_median", "other_median", "p_value")], 4)
+  print(tests, row.names = FALSE)
+
+  cat("\nInterpretation rule:\n")
+  cat("  Direct support for specialist bridging requires specialists to be higher on betweenness,\n")
+  cat("  broker_idx, or cross-category bridging measures, not merely on in-degree or out-degree.\n")
+  cat("  If only degree differs, this is not evidence of a bridging profile.\n\n")
+
+  invisible(list(df = df, tests = tests))
+}
+
+bridge_comp25  <- run_specialist_bridging_tests(m_comp25,  "COMPON 2025")
+bridge_llm_all <- run_specialist_bridging_tests(m_llm_all, "LLM 2016-2025")
+bridge_raw_all <- run_specialist_bridging_tests(m_raw_all, "Raw 2016-2025")
+
 cat("\n=== Script complete ===\n")
