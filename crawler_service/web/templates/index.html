@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — COMPON Crawler{% endblock %}
+{% block content %}
+
+<div class="cards" id="gcards">
+  <div class="card"><div class="v" id="g-pages">{{ gstats.pages }}</div><div class="l">pages saved</div></div>
+  <div class="card"><div class="v" id="g-links">{{ gstats.links }}</div><div class="l">hyperlink edges</div></div>
+  <div class="card"><div class="v" id="g-files">{{ gstats.files }}</div><div class="l">file links (PDF…)</div></div>
+  <div class="card"><div class="v" id="g-pending">{{ gstats.urls_by_status.get('pending', 0) }}</div><div class="l">frontier pending</div></div>
+  <div class="card"><div class="v" id="g-failed">{{ gstats.urls_by_status.get('failed', 0) }}</div><div class="l">failed URLs</div></div>
+  <div class="card"><div class="v" id="g-running">{{ running }}/{{ max_concurrent }}</div><div class="l">orgs crawling</div></div>
+</div>
+
+<p>
+  <button class="primary" onclick="post('/api/start_all').then(refresh)">▶ Start all ready orgs</button>
+  <span class="muted">Orgs need a verified seed URL before they can start — see
+  <a href="/curation">URL curation</a>.</span>
+</p>
+
+<table>
+  <thead><tr>
+    <th>Org</th><th>Name</th><th>Seed URL</th><th>State</th>
+    <th class="num">Pages</th><th class="num">Pending</th><th class="num">Refetch</th>
+    <th class="num">Failed</th><th class="num">Excl.</th><th class="num">Files</th>
+    <th>Last activity</th><th>Actions</th>
+  </tr></thead>
+  <tbody id="org-tbody">
+  {% for r in rows %}
+    <tr>
+      <td><a href="/org/{{ r.org_id }}">{{ r.org_id }}</a>{% if r.flagged %} <span class="flag" title="page threshold crossed — review scope">⚑</span>{% endif %}</td>
+      <td><a href="/org/{{ r.org_id }}">{{ r.name }}</a></td>
+      <td>{% if r.seed_url %}<a href="{{ r.seed_url }}" target="_blank" rel="noopener">{{ r.seed_url[:45] }}</a>
+          {% if not r.url_verified %}<span class="lvl-warning" title="not verified">?</span>{% endif %}
+          {% else %}<span class="muted">— not set —</span>{% endif %}</td>
+      <td><span class="badge st-{{ r.state }}">{{ r.state }}</span>
+          {% if r.engine == 'browser' %}<span title="browser engine">🌐</span>{% endif %}</td>
+      <td class="num">{{ r.pages }}</td>
+      <td class="num">{{ r.pending - r.refetch_backlog }}</td>
+      <td class="num muted">{{ r.refetch_backlog }}</td>
+      <td class="num {% if r.failed %}lvl-error{% endif %}">{{ r.failed }}</td>
+      <td class="num muted">{{ r.excluded }}</td>
+      <td class="num">{{ r.files }}</td>
+      <td class="muted">{{ (r.last_activity or '')[:16].replace('T',' ') }}</td>
+      <td>
+        {% if r.state in ('running', 'queued') %}
+          <button onclick="post('/api/org/{{ r.org_id }}/pause').then(refresh)">⏸ Pause</button>
+        {% elif r.url_verified and r.seed_url %}
+          <button class="primary" onclick="post('/api/org/{{ r.org_id }}/start').then(refresh)">▶ Start</button>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function post(url) { return fetch(url, {method: 'POST'}); }
+function refresh() { location.reload(); }
+// live-ish updates: reload the page every 10s unless the user is interacting
+let idle = 0;
+document.addEventListener('mousemove', () => idle = 0);
+document.addEventListener('keydown', () => idle = 0);
+setInterval(() => { idle += 1; if (idle >= 1) location.reload(); }, 10000);
+document.getElementById('hdr-status').textContent = 'auto-refresh 10s';
+</script>
+{% endblock %}

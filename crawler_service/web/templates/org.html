@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}{{ org.org_id }} {{ org.name }} — COMPON Crawler{% endblock %}
+{% block content %}
+
+<p><a href="/">← dashboard</a></p>
+<h2>{{ org.org_id }} — {{ org.name }}
+  <span class="badge st-{{ org.state }}">{{ org.state }}</span>
+  {% if org.flagged %}<span class="flag">⚑ threshold crossed</span>{% endif %}
+</h2>
+
+<div class="cards">
+  <div class="card"><div class="v">{{ report.pages_saved }}</div><div class="l">pages saved</div></div>
+  <div class="card"><div class="v">{{ report.coverage_pct }}%</div><div class="l">coverage (done / discovered)</div></div>
+  <div class="card"><div class="v">{{ report.fresh_backlog }}</div><div class="l">fresh backlog</div></div>
+  <div class="card"><div class="v">{{ report.refetch_backlog }}</div><div class="l">refetch backlog</div></div>
+  <div class="card"><div class="v">{{ report.failed }}</div><div class="l">failed</div></div>
+  <div class="card"><div class="v">{{ report.file_links }}</div><div class="l">file links</div></div>
+  <div class="card"><div class="v">{{ report.hyperlink_edges }}</div><div class="l">hyperlink edges</div></div>
+</div>
+
+<p>
+  {% if org.state in ('running', 'queued') %}
+    <button class="warn" onclick="post('/api/org/{{ org.org_id }}/pause').then(()=>location.reload())">⏸ Pause</button>
+  {% else %}
+    <button class="primary" onclick="post('/api/org/{{ org.org_id }}/start').then(()=>location.reload())">▶ Start crawl</button>
+  {% endif %}
+  <button onclick="post('/api/org/{{ org.org_id }}/retry_failed').then(()=>location.reload())">↻ Retry failed ({{ report.failed }})</button>
+  <button title="re-fetch listing/section/pagination pages only — where new links appear"
+          onclick="post('/api/org/{{ org.org_id }}/queue_refetch?mode=hubs').then(()=>location.reload())">⟳ Refetch hubs</button>
+  <button title="re-fetch every previously fetched page"
+          onclick="if(confirm('Re-fetch ALL previously fetched pages of this org?')) post('/api/org/{{ org.org_id }}/queue_refetch?mode=all').then(()=>location.reload())">⟳ Refetch all</button>
+  <button title="clear the refetch queue — keep snapshots archival"
+          onclick="post('/api/org/{{ org.org_id }}/queue_refetch?mode=none').then(()=>location.reload())">✕ Clear refetch</button>
+</p>
+
+<div class="grid2">
+  <div class="panel">
+    <h3>Settings</h3>
+    <form method="post" action="/org/{{ org.org_id }}/settings">
+      <p><label>Seed URL<br>
+        <input type="text" name="seed_url" value="{{ org.seed_url }}"></label>
+        {% if org.seed_url %}<a href="{{ org.seed_url }}" target="_blank" rel="noopener">open ↗</a>{% endif %}
+      </p>
+      <p><label><input type="checkbox" name="url_verified" value="1"
+          {% if org.url_verified %}checked{% endif %}> URL manually verified (required to start)</label></p>
+      <p><label>Scope rules (one per line: <code>domain:example.cz</code> or
+        <code>prefix:host/path</code>)<br>
+        <textarea name="scope" rows="4">{{ scope_text }}</textarea></label></p>
+      <p><label>Engine
+        <select name="engine">
+          <option value="http" {% if org.engine == 'http' %}selected{% endif %}>http (fast, default)</option>
+          <option value="browser" {% if org.engine == 'browser' %}selected{% endif %}>browser (JS-rendered sites)</option>
+        </select></label></p>
+      <p><label><input type="checkbox" name="accept_any_status" value="1"
+          {% if org.accept_any_status %}checked{% endif %}>
+          Accept 4xx responses as content (for broken CMS that sends 404 on every page)</label></p>
+      <p><label>Max depth <input type="number" name="max_depth" value="{{ org.max_depth }}"></label></p>
+      <p><label>Flag threshold (pages; flag only, never stops)
+        <input type="number" name="flag_threshold" value="{{ org.flag_threshold }}"></label></p>
+      <p><label>Notes<br><textarea name="notes" rows="2">{{ org.notes }}</textarea></label></p>
+      <button class="primary" type="submit">Save settings</button>
+    </form>
+  </div>
+
+  <div class="panel">
+    <h3>Audit</h3>
+    <p class="muted">Discovered URLs: {{ report.discovered_urls }} ·
+       duplicates: {{ report.duplicate_content_urls }} ·
+       sitemap: {{ report.sitemap.fetched }}/{{ report.sitemap.total }} fetched</p>
+    <h3 style="margin-top:14px">Failures by type</h3>
+    {% if report.failed_by_error %}
+      <table><tbody>
+      {% for cls, n in report.failed_by_error.items() %}
+        <tr><td>{{ cls }}</td><td class="num">{{ n }}</td></tr>
+      {% endfor %}
+      </tbody></table>
+    {% else %}<p class="muted">none</p>{% endif %}
+    <h3 style="margin-top:14px">Exclusions by reason</h3>
+    {% if report.excluded_by_reason %}
+      <table><tbody>
+      {% for cls, n in report.excluded_by_reason.items() %}
+        <tr><td>{{ cls }}</td><td class="num">{{ n }}</td></tr>
+      {% endfor %}
+      </tbody></table>
+    {% else %}<p class="muted">none</p>{% endif %}
+  </div>
+</div>
+
+<div class="grid2">
+  <div class="panel">
+    <h3>Recent failures
+      <a class="btn" href="/org/{{ org.org_id }}/report/failed.csv">⬇ failed.csv</a>
+      <a class="btn" href="/org/{{ org.org_id }}/report/deleted.csv"
+         title="pages we hold a snapshot of that now return 404/410 — content the org deleted">⬇ deleted-content.csv</a>
+    </h3>
+    <div class="scroll">
+    {% if failures %}
+      <table><tbody>
+      {% for f in failures %}
+        <tr><td style="white-space:normal; word-break:break-all">{{ f.url }}</td>
+            <td class="lvl-error">{{ f.last_error }}</td></tr>
+      {% endfor %}
+      </tbody></table>
+    {% else %}<p class="muted">none</p>{% endif %}
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Events</h3>
+    <div class="scroll">
+      <table><tbody>
+      {% for e in events %}
+        <tr><td class="muted">{{ e.ts[:16].replace('T',' ') }}</td>
+            <td class="lvl-{{ e.level }}">{{ e.level }}</td>
+            <td style="white-space:normal">{{ e.message }}</td></tr>
+      {% endfor %}
+      </tbody></table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>function post(url) { return fetch(url, {method: 'POST'}); }</script>
+{% endblock %}

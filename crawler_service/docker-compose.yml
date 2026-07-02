@@ -1,0 +1,25 @@
+# Deployment on Unraid (homelab):
+#   1. git clone the repo to the server (e.g. /mnt/user/Storage/compon-crawler/repo)
+#   2. Data volume: /mnt/user/Storage/compon-crawler/data  (crawler.db + raw/)
+#   3. cd repo/crawler_service && docker compose up -d --build
+#   4. Dashboard at http://homelab:8055
+services:
+  compon-crawler:
+    build:
+      context: ..
+      dockerfile: crawler_service/Dockerfile
+    container_name: compon-crawler
+    restart: unless-stopped
+    ports:
+      - "8055:8055"
+    volumes:
+      - /mnt/user/Storage/compon-crawler/data:/data
+    environment:
+      CRAWLER_DELAY: "2.0"          # per-domain minimum; robots crawl-delay overrides upward
+      CRAWLER_DELAY_JITTER: "3.0"   # random 0-3s added -> requests land 2-5s apart
+      CRAWLER_MAX_CONCURRENT_ORGS: "6"
+      CRAWLER_MAX_DEPTH: "10"
+      CRAWLER_FLAG_THRESHOLD: "50000"
+      # CRAWLER_USER_AGENT: override if needed
+    # SQLite WAL + 32k+ small files: keep the volume on a real disk path
+    # (not /mnt/user0 fuse quirks); array share via /mnt/user works fine.

@@ -1,0 +1,10 @@
+# Build context for crawler_service/Dockerfile — keep the image lean:
+# only crawler_service/ is COPY'd, but the context upload still matters.
+data/
+outputs/
+thesis_for_repo/
+.git/
+**/__pycache__
+**/*.pyc
+*.xlsx
+*.docx

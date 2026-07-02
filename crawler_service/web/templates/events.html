@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Events — COMPON Crawler{% endblock %}
+{% block content %}
+<h2>Events (latest 300)</h2>
+<table>
+  <thead><tr><th>Time (UTC)</th><th>Org</th><th>Level</th><th>Message</th></tr></thead>
+  <tbody>
+  {% for e in events %}
+    <tr>
+      <td class="muted">{{ e.ts[:19].replace('T',' ') }}</td>
+      <td>{% if e.org_id %}<a href="/org/{{ e.org_id }}">{{ e.org_id }}</a>{% endif %}</td>
+      <td class="lvl-{{ e.level }}">{{ e.level }}</td>
+      <td style="white-space:normal">{{ e.message }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

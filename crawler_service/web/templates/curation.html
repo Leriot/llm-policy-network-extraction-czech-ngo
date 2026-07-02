@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}URL curation — COMPON Crawler{% endblock %}
+{% block content %}
+
+<h2>URL curation</h2>
+<p class="muted">Enter each org's homepage, open it to double-check it's the right
+organisation, then tick <b>verified</b> and save. Only verified orgs can be crawled.
+The <em>search</em> link opens a pre-filled web search in a new tab.</p>
+
+{% for o in todo %}
+<form id="f-{{ o.org_id }}" method="post" action="/curation/{{ o.org_id }}"></form>
+{% endfor %}
+
+<h3>Needs a verified URL ({{ todo|length }})</h3>
+<table>
+  <thead><tr><th>Org</th><th>Name</th><th style="width:45%">Homepage URL</th>
+    <th>Verified</th><th></th><th></th></tr></thead>
+  <tbody>
+  {% for o in todo %}
+    <tr>
+      <td><a href="/org/{{ o.org_id }}">{{ o.org_id }}</a></td>
+      <td>{{ o.name }}</td>
+      <td><input form="f-{{ o.org_id }}" type="text" name="seed_url"
+                 value="{{ o.seed_url }}" placeholder="https://…"></td>
+      <td><input form="f-{{ o.org_id }}" type="checkbox" name="verified" value="1"
+                 {% if o.seed_url %}checked{% endif %}></td>
+      <td><button form="f-{{ o.org_id }}" class="primary" type="submit">Save</button></td>
+      <td><a class="btn" target="_blank" rel="noopener"
+             href="https://www.google.com/search?q={{ quote_plus(o.name + ' oficiální web') }}">search ↗</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h3 style="margin-top:28px">Verified ({{ done|length }})</h3>
+<table>
+  <thead><tr><th>Org</th><th>Name</th><th>URL</th><th>State</th></tr></thead>
+  <tbody>
+  {% for o in done %}
+    <tr>
+      <td><a href="/org/{{ o.org_id }}">{{ o.org_id }}</a></td>
+      <td>{{ o.name }}</td>
+      <td><a href="{{ o.seed_url }}" target="_blank" rel="noopener">{{ o.seed_url }}</a></td>
+      <td><span class="badge st-{{ o.state }}">{{ o.state }}</span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

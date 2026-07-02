@@ -1,0 +1,6 @@
+**/__pycache__
+**/*.pyc
+data/
+outputs/
+thesis_for_repo/
+.git/
