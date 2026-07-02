@@ -28,14 +28,28 @@ db: Database = None
 manager: CrawlManager = None
 
 
+async def _nightly_backup():
+    import asyncio
+    while True:
+        await asyncio.sleep(24 * 3600)
+        try:
+            target = await asyncio.to_thread(db.backup)
+            db.add_event(None, "info", f"database backup written: {target.name}")
+        except Exception as e:
+            db.add_event(None, "error", f"database backup FAILED: {e}")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global db, manager
+    import asyncio
     db = Database()
     manager = CrawlManager(db)
     await manager.startup()
+    backup_task = asyncio.create_task(_nightly_backup())
     logger.info(f"dashboard up — data dir {config.DATA_DIR.resolve()}")
     yield
+    backup_task.cancel()
     await manager.shutdown()
     db.close()
 
@@ -272,6 +286,14 @@ async def report_deleted(org_id: str):
                           "snapshot_file", "snapshot_taken"],
                          ([r["url"], r["http_status"], r["last_attempt"], r["doc_id"],
                            r["file_path"], r["snapshot_taken"]] for r in rows))
+
+
+@app.post("/api/backup")
+async def api_backup():
+    import asyncio
+    target = await asyncio.to_thread(db.backup)
+    db.add_event(None, "info", f"manual database backup: {target.name}")
+    return JSONResponse({"backup": target.name})
 
 
 @app.get("/healthz")

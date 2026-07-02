@@ -183,6 +183,19 @@ class Database:
         with self.lock:
             self.conn.close()
 
+    def backup(self, keep: int = 5) -> Path:
+        """Consistent online snapshot via VACUUM INTO (safe during writes,
+        unlike copying the file). Keeps the newest `keep` snapshots."""
+        backup_dir = self.db_path.parent / "backups"
+        backup_dir.mkdir(parents=True, exist_ok=True)
+        target = backup_dir / f"crawler-{datetime.now(timezone.utc):%Y%m%d-%H%M%S}.db"
+        with self.lock:
+            self.conn.execute("VACUUM INTO ?", (str(target),))
+        snapshots = sorted(backup_dir.glob("crawler-*.db"))
+        for old in snapshots[:-keep]:
+            old.unlink()
+        return target
+
     # ------------------------------------------------------------------ util
     def _exec(self, sql: str, params: tuple = ()) -> sqlite3.Cursor:
         with self.lock:
