@@ -4,7 +4,7 @@
 
 <div class="cards" id="gcards">
   <div class="card"><div class="v" id="g-pages">{{ gstats.pages }}</div><div class="l">pages saved</div></div>
-  <div class="card"><div class="v" id="g-links">{{ gstats.links }}</div><div class="l">hyperlink edges</div></div>
+  <div class="card"><div class="v" id="g-links">{{ gstats.links }}</div><div class="l">unique link targets</div></div>
   <div class="card"><div class="v" id="g-files">{{ gstats.files }}</div><div class="l">file links (PDF…)</div></div>
   <div class="card"><div class="v" id="g-pending">{{ gstats.urls_by_status.get('pending', 0) }}</div><div class="l">frontier pending</div></div>
   <div class="card"><div class="v" id="g-failed">{{ gstats.urls_by_status.get('failed', 0) }}</div><div class="l">failed URLs</div></div>

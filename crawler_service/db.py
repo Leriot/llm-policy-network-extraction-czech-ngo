@@ -86,14 +86,14 @@ CREATE INDEX IF NOT EXISTS idx_pages_org_hash ON pages(org_id, content_hash);
 CREATE TABLE IF NOT EXISTS links (
     id INTEGER PRIMARY KEY,
     org_id TEXT NOT NULL,
-    source_url TEXT NOT NULL,
     target_url TEXT NOT NULL,
     anchor_text TEXT DEFAULT '',
     link_type TEXT DEFAULT 'internal',
+    first_source_url TEXT DEFAULT '',
     occurrences INTEGER DEFAULT 1,
     first_seen TEXT,
     last_seen TEXT,
-    UNIQUE(org_id, source_url, target_url)
+    UNIQUE(org_id, target_url)
 );
 CREATE INDEX IF NOT EXISTS idx_links_org ON links(org_id);
 
@@ -167,6 +167,7 @@ class Database:
 
     def _migrate(self):
         """In-place schema upgrades for databases created by earlier versions."""
+        self._migrate_links_dedup()
         with self.lock:
             org_cols = {r[1] for r in self.conn.execute("PRAGMA table_info(orgs)")}
             if "accept_any_status" not in org_cols:
@@ -183,6 +184,48 @@ class Database:
                 "UPDATE pages SET doc_id = org_id || '-' || substr(content_hash, 1, 12) "
                 "WHERE doc_id IS NULL")
             self.conn.commit()
+
+    def _migrate_links_dedup(self):
+        """One-time collapse of the per-page-pair edge list to unique
+        (org, target) links. Per-page fidelity stays recoverable from the
+        archived HTML (rebuild.py); the DB only needs unique links — the
+        26M-row/14GB edge list was 95% nav-menu repetition. Runs at startup
+        on a stopped world; takes minutes on the old data."""
+        with self.lock:
+            cols = {r[1] for r in self.conn.execute("PRAGMA table_info(links)")}
+            if "first_source_url" in cols or "source_url" not in cols:
+                return  # already migrated (or fresh install)
+            import logging
+            log = logging.getLogger(__name__)
+            n = self.conn.execute("SELECT COUNT(*) FROM links").fetchone()[0]
+            log.warning(f"links dedup migration starting: {n} rows -> unique (org, target)…")
+            self.conn.executescript("""
+                CREATE TABLE links_new (
+                    id INTEGER PRIMARY KEY,
+                    org_id TEXT NOT NULL,
+                    target_url TEXT NOT NULL,
+                    anchor_text TEXT DEFAULT '',
+                    link_type TEXT DEFAULT 'internal',
+                    first_source_url TEXT DEFAULT '',
+                    occurrences INTEGER DEFAULT 1,
+                    first_seen TEXT,
+                    last_seen TEXT,
+                    UNIQUE(org_id, target_url)
+                );
+                INSERT INTO links_new (org_id, target_url, anchor_text, link_type,
+                                       first_source_url, occurrences, first_seen, last_seen)
+                    SELECT org_id, target_url, MIN(anchor_text), MAX(link_type),
+                           MIN(source_url), SUM(occurrences), MIN(first_seen), MAX(last_seen)
+                    FROM links GROUP BY org_id, target_url;
+                DROP TABLE links;
+                ALTER TABLE links_new RENAME TO links;
+                CREATE INDEX IF NOT EXISTS idx_links_org ON links(org_id);
+            """)
+            self.conn.commit()
+            kept = self.conn.execute("SELECT COUNT(*) FROM links").fetchone()[0]
+            log.warning(f"links dedup: {n} -> {kept} rows; reclaiming space (VACUUM)…")
+            self.conn.execute("VACUUM")
+            log.warning("links dedup migration finished")
 
     def close(self):
         with self.lock:
@@ -451,19 +494,21 @@ class Database:
 
     # ------------------------------------------------------------------ links
     def add_links_batch(self, org_id: str, source_url: str, links: List[Dict]):
-        """links: [{url, text, type}] — deduplicated edges, occurrence-counted."""
+        """links: [{url, text, type}] — unique (org, target) rows; repeats
+        bump the counter in place instead of adding rows (nav menus would
+        otherwise multiply every target by the page count)."""
         ts = now_iso()
         with self.lock:
-            for link in links:
-                self.conn.execute(
-                    """INSERT INTO links (org_id, source_url, target_url, anchor_text, link_type,
-                                          occurrences, first_seen, last_seen)
-                       VALUES (?, ?, ?, ?, ?, 1, ?, ?)
-                       ON CONFLICT(org_id, source_url, target_url) DO UPDATE SET
-                           last_seen = excluded.last_seen""",
-                    (org_id, source_url, link["url"], (link.get("text") or "")[:500],
-                     link.get("type", "internal"), ts, ts),
-                )
+            self.conn.executemany(
+                """INSERT INTO links (org_id, target_url, anchor_text, link_type,
+                                      first_source_url, occurrences, first_seen, last_seen)
+                   VALUES (?, ?, ?, ?, ?, 1, ?, ?)
+                   ON CONFLICT(org_id, target_url) DO UPDATE SET
+                       occurrences = occurrences + 1, last_seen = excluded.last_seen""",
+                [(org_id, link["url"], (link.get("text") or "")[:500],
+                  link.get("type", "internal"), source_url, ts, ts)
+                 for link in links],
+            )
             self.conn.commit()
 
     def add_file_links_batch(self, org_id: str, source_url: str, files: List[Dict]):

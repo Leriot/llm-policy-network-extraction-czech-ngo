@@ -39,6 +39,32 @@ async def _nightly_backup():
             db.add_event(None, "error", f"database backup FAILED: {e}")
 
 
+async def _db_size_watchdog():
+    """Pause everything if the DB crosses the size threshold — a guaranteed
+    human decision point instead of a full SSD (user decision)."""
+    import asyncio
+    while True:
+        await asyncio.sleep(600)
+        if not config.DB_PAUSE_GB:
+            continue
+        try:
+            size_gb = config.DB_PATH.stat().st_size / 1e9
+        except OSError:
+            continue
+        if size_gb < config.DB_PAUSE_GB:
+            continue
+        paused = 0
+        for org in db.list_orgs():
+            if org["state"] in ("running", "queued"):
+                manager.pause_org(org["org_id"])
+                paused += 1
+        if paused:
+            db.add_event(None, "error",
+                         f"DB reached {size_gb:.1f} GB (threshold "
+                         f"{config.DB_PAUSE_GB} GB) — paused {paused} orgs. "
+                         f"Decide how to proceed, then resume.")
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global db, manager
@@ -47,8 +73,10 @@ async def lifespan(app: FastAPI):
     manager = CrawlManager(db)
     await manager.startup()
     backup_task = asyncio.create_task(_nightly_backup())
+    watchdog_task = asyncio.create_task(_db_size_watchdog())
     logger.info(f"dashboard up — data dir {config.DATA_DIR.resolve()}")
     yield
+    watchdog_task.cancel()
     backup_task.cancel()
     await manager.shutdown()
     db.close()

@@ -80,10 +80,10 @@ def rebuild_org(db: Database, org, force: bool = False) -> dict:
             logger.info(f"{org_id}: parsed {parsed}/{len(pages)} pages…")
 
     db.bulk_execute(
-        """INSERT INTO links (org_id, source_url, target_url, anchor_text,
+        """INSERT INTO links (org_id, first_source_url, target_url, anchor_text,
                               link_type, first_seen, last_seen)
            VALUES (?, ?, ?, ?, ?, ?, ?)
-           ON CONFLICT(org_id, source_url, target_url) DO UPDATE SET
+           ON CONFLICT(org_id, target_url) DO UPDATE SET
                occurrences = occurrences + 1""",
         link_rows)
     db.bulk_execute(

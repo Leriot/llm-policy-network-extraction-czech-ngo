@@ -58,6 +58,11 @@ FLAG_THRESHOLD_DEFAULT = _env("CRAWLER_FLAG_THRESHOLD", 50000)  # dashboard flag
 # Dev/testing only: stop an org after N page saves in one session (0 = unlimited)
 DEV_MAX_PAGES = _env("CRAWLER_DEV_MAX_PAGES", 0)
 
+# Safety valve (user decision): if the DB file exceeds this many GB, pause all
+# crawling and raise an alert — a guaranteed decision point instead of a full
+# disk. 0 disables.
+DB_PAUSE_GB = _env("CRAWLER_DB_PAUSE_GB", 45.0)
+
 # Web UI
 WEB_HOST = _env("CRAWLER_WEB_HOST", "0.0.0.0")
 WEB_PORT = _env("CRAWLER_WEB_PORT", 8055)
