@@ -18,6 +18,8 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(name)s %(levelname)s %(message)s",
 )
+# one log line per fetched URL is noise at production volume
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
 def main():

@@ -89,7 +89,7 @@ def _org_rows():
 
 # --------------------------------------------------------------------- pages
 @app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
+def index(request: Request):
     return templates.TemplateResponse(request, "index.html", {
         "rows": _org_rows(),
         "gstats": db.global_stats(),
@@ -99,7 +99,7 @@ async def index(request: Request):
 
 
 @app.get("/org/{org_id}", response_class=HTMLResponse)
-async def org_detail(request: Request, org_id: str):
+def org_detail(request: Request, org_id: str):
     org = db.get_org(org_id)
     if org is None:
         return HTMLResponse("unknown org", status_code=404)
@@ -119,7 +119,7 @@ async def org_detail(request: Request, org_id: str):
 
 
 @app.get("/curation", response_class=HTMLResponse)
-async def curation(request: Request):
+def curation(request: Request):
     orgs = db.list_orgs()
     todo = [o for o in orgs if not o["url_verified"]]
     done = [o for o in orgs if o["url_verified"]]
@@ -129,7 +129,7 @@ async def curation(request: Request):
 
 
 @app.get("/events", response_class=HTMLResponse)
-async def events_page(request: Request):
+def events_page(request: Request):
     events = db.query(
         "SELECT * FROM events ORDER BY id DESC LIMIT 300")
     return templates.TemplateResponse(request, "events.html", {"events": events})
@@ -137,13 +137,13 @@ async def events_page(request: Request):
 
 # --------------------------------------------------------------------- API
 @app.get("/api/orgs")
-async def api_orgs():
+def api_orgs():
     return JSONResponse({"rows": _org_rows(), "gstats": db.global_stats(),
                          "running": manager.running_count()})
 
 
 @app.get("/api/audit/{org_id}")
-async def api_audit(org_id: str):
+def api_audit(org_id: str):
     return JSONResponse(audit_mod.audit_org(db, org_id))
 
 
@@ -158,14 +158,14 @@ async def api_pause(org_id: str):
 
 
 @app.post("/api/org/{org_id}/retry_failed")
-async def api_retry_failed(org_id: str):
+def api_retry_failed(org_id: str):
     n = db.requeue_failed(org_id)
     db.add_event(org_id, "info", f"requeued {n} failed URLs")
     return JSONResponse({"requeued": n})
 
 
 @app.post("/api/org/{org_id}/queue_refetch")
-async def api_queue_refetch(org_id: str, mode: str = "hubs"):
+def api_queue_refetch(org_id: str, mode: str = "hubs"):
     if mode not in ("hubs", "all", "none"):
         return JSONResponse({"error": "mode must be hubs|all|none"}, status_code=400)
     result = db.queue_refetch(org_id, mode)
@@ -181,7 +181,7 @@ async def api_start_all():
 
 
 @app.post("/org/{org_id}/settings")
-async def org_settings(org_id: str,
+def org_settings(org_id: str,
                        seed_url: str = Form(""),
                        url_verified: str = Form(""),
                        scope: str = Form(""),
@@ -229,7 +229,7 @@ async def org_settings(org_id: str,
 
 
 @app.post("/curation/{org_id}")
-async def curation_save(org_id: str, seed_url: str = Form(...),
+def curation_save(org_id: str, seed_url: str = Form(...),
                         verified: str = Form("")):
     normalized = urlnorm.normalize_url(seed_url.strip())
     if not normalized:
@@ -256,7 +256,7 @@ def _csv_response(filename: str, header: list, rows) -> PlainTextResponse:
 
 
 @app.get("/org/{org_id}/report/failed.csv")
-async def report_failed(org_id: str):
+def report_failed(org_id: str):
     rows = db.query(
         """SELECT url, http_status, last_error, retries, discovered_at, fetched_at
            FROM urls WHERE org_id=? AND status='failed' ORDER BY http_status, url""",
@@ -269,7 +269,7 @@ async def report_failed(org_id: str):
 
 
 @app.get("/org/{org_id}/report/deleted.csv")
-async def report_deleted(org_id: str):
+def report_deleted(org_id: str):
     """Pages we hold an archived snapshot of that now return 404/410 — i.e.
     content the organisation has since removed from its site."""
     rows = db.query(
@@ -297,6 +297,6 @@ async def api_backup():
 
 
 @app.get("/healthz")
-async def healthz():
+def healthz():
     db.query_one("SELECT 1")
     return {"ok": True, "running_orgs": manager.running_count()}

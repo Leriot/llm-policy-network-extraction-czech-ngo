@@ -233,6 +233,13 @@ class OrgCrawler:
                                content_type=result.content_type, reason="too_short")
             return
 
+        # HTML parsing + all storage writes are synchronous and, on slow
+        # storage (Unraid fuse array), long enough to starve the event loop —
+        # run the whole step in a worker thread so fetching and the web UI
+        # keep breathing.
+        await asyncio.to_thread(self._store_page, org, row, scope, url, final, result)
+
+    def _store_page(self, org, row, scope, url: str, final: str, result: FetchResult):
         # ---- link extraction (always, also on refetch — that's the point) ----
         soup = extractor.parse_html(result.content, result.encoding)
         hyperlinks, file_links = extractor.extract_links(soup, final, scope)
@@ -242,6 +249,8 @@ class OrgCrawler:
             self.db.add_file_links_batch(self.org_id, url, file_links)
 
         new_depth = (row["depth"] or 0) + 1
+        max_depth = org["max_depth"] or config.MAX_DEPTH_DEFAULT
+        frontier_rows = []
         for link in hyperlinks:
             if link["type"] != "internal":
                 continue
@@ -249,14 +258,16 @@ class OrgCrawler:
             key = urlnorm.url_key(target)
             reason = urlnorm.exclusion_reason(target)
             if reason:
-                self.db.add_url(self.org_id, target, key, depth=new_depth,
-                                parent_url=url, status="excluded", reason=reason)
-            elif new_depth > (org["max_depth"] or config.MAX_DEPTH_DEFAULT):
-                self.db.add_url(self.org_id, target, key, depth=new_depth,
-                                parent_url=url, status="excluded", reason="max_depth")
+                frontier_rows.append((self.org_id, target, key, "excluded",
+                                      reason, "link", new_depth, url))
+            elif new_depth > max_depth:
+                frontier_rows.append((self.org_id, target, key, "excluded",
+                                      "max_depth", "link", new_depth, url))
             else:
-                self.db.add_url(self.org_id, target, key, depth=new_depth,
-                                parent_url=url)
+                frontier_rows.append((self.org_id, target, key, "pending",
+                                      None, "link", new_depth, url))
+        if frontier_rows:
+            self.db.add_urls_batch(frontier_rows)
 
         # ---- snapshot save (only when content actually changed) ----
         content_hash = urlnorm.content_sha256(result.content)

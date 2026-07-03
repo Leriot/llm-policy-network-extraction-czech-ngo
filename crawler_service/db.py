@@ -271,6 +271,19 @@ class Database:
             self.conn.commit()
             return cur.rowcount > 0
 
+    def add_urls_batch(self, rows: List[tuple]):
+        """One transaction for a page's whole frontier contribution.
+        rows: (org_id, url, url_key, status, reason, source, depth, parent_url).
+        Critical on slow storage: per-link commits starved the event loop."""
+        ts = now_iso()
+        with self.lock:
+            self.conn.executemany(
+                """INSERT OR IGNORE INTO urls (org_id, url, url_key, status, reason,
+                       source, depth, parent_url, discovered_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                [r + (ts,) for r in rows])
+            self.conn.commit()
+
     def claim_next_url(self, org_id: str) -> Optional[sqlite3.Row]:
         """Claim the next pending URL (fresh URLs before refetches, shallow first)."""
         with self.lock:
