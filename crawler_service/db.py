@@ -156,6 +156,8 @@ class Database:
             self.conn.execute("PRAGMA journal_mode=WAL")
             self.conn.execute("PRAGMA synchronous=NORMAL")
             self.conn.execute("PRAGMA foreign_keys=ON")
+            # keep the WAL from parking at a bulk-operation high-water mark
+            self.conn.execute("PRAGMA journal_size_limit=268435456")  # 256 MB
             self.conn.executescript(
                 SCHEMA.format(
                     max_depth=config.MAX_DEPTH_DEFAULT,
