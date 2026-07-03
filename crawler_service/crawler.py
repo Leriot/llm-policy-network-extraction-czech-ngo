@@ -132,12 +132,12 @@ class OrgCrawler:
             # honor pause/stop requested via the dashboard
             check_counter += 1
             if check_counter % 5 == 1:
-                state = self._org()["state"]
+                state = (await asyncio.to_thread(self._org))["state"]
                 if state != "running":
                     self.db.add_event(self.org_id, "info", f"stopping (state={state})")
                     return
 
-            row = self.db.claim_next_url(self.org_id)
+            row = await asyncio.to_thread(self.db.claim_next_url, self.org_id)
             if row is None:
                 self.db.set_org_fields(self.org_id, state="done")
                 self.db.add_event(self.org_id, "info", "frontier exhausted — org done")
@@ -161,13 +161,13 @@ class OrgCrawler:
 
     # ------------------------------------------------------------------ page
     async def _process(self, row):
-        org = self._org()
+        org = await asyncio.to_thread(self._org)
         scope = self._scope(org)
         url = row["url"]
 
         # robots.txt (recorded, not silent)
         if not await self.robots.can_fetch(self.http_fetcher.client, url):
-            self.db.finish_url(row["id"], "excluded", reason="robots_txt")
+            await asyncio.to_thread(self.db.finish_url, row["id"], "excluded", reason="robots_txt")
             return
 
         crawl_delay = await self.robots.crawl_delay(self.http_fetcher.client, url)

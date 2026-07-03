@@ -14,7 +14,12 @@ services:
       - "8055:8055"
     volumes:
       - /mnt/user/Storage/compon-crawler/data:/data
+      # hot DB on the SSD cache pool (direct disk path, bypasses fuse):
+      # commits are sub-ms there vs 5-20ms on the array — the array is for
+      # the page corpus and backups, the SSD for the working set
+      - /mnt/cache/appdata/compon-crawler:/db
     environment:
+      CRAWLER_DB_PATH: "/db/crawler.db"
       CRAWLER_DELAY: "2.0"          # per-domain minimum; robots crawl-delay overrides upward
       CRAWLER_DELAY_JITTER: "3.0"   # random 0-3s added -> requests land 2-5s apart
       # politeness is per-domain, so org-level parallelism is free throughput;

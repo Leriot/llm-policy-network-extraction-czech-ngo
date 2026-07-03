@@ -19,7 +19,7 @@ def audit_org(db: Database, org_id: str) -> Dict:
     stats = db.org_stats(org_id)
 
     failed_by_error = {
-        (r["cls"] or "unknown"): r["n"] for r in db.query(
+        (r["cls"] or "unknown"): r["n"] for r in db.read_query(
             """SELECT CASE
                      WHEN last_error LIKE 'HTTP 4%' THEN substr(last_error, 1, 8)
                      WHEN last_error LIKE 'HTTP 5%' THEN substr(last_error, 1, 8)
@@ -32,22 +32,22 @@ def audit_org(db: Database, org_id: str) -> Dict:
             (org_id,))
     }
     excluded_by_reason = {
-        (r["cls"] or "unknown"): r["n"] for r in db.query(
+        (r["cls"] or "unknown"): r["n"] for r in db.read_query(
             """SELECT CASE WHEN reason LIKE 'redirect_out_of_scope%' THEN 'redirect_out_of_scope'
                            ELSE COALESCE(reason,'unknown') END cls, COUNT(*) n
                FROM urls WHERE org_id=? AND status='excluded' GROUP BY cls ORDER BY n DESC""",
             (org_id,))
     }
-    refetch_backlog = db.query_one(
+    refetch_backlog = db.read_query_one(
         "SELECT COUNT(*) n FROM urls WHERE org_id=? AND status='pending' AND refetch=1",
         (org_id,))["n"]
     fresh_backlog = stats["pending"] - refetch_backlog
-    sitemap_total = db.query_one(
+    sitemap_total = db.read_query_one(
         "SELECT COUNT(*) n FROM urls WHERE org_id=? AND source='sitemap'", (org_id,))["n"]
-    sitemap_done = db.query_one(
+    sitemap_done = db.read_query_one(
         "SELECT COUNT(*) n FROM urls WHERE org_id=? AND source='sitemap' AND status='done'",
         (org_id,))["n"]
-    dup_pages = db.query_one(
+    dup_pages = db.read_query_one(
         "SELECT COUNT(*) n FROM urls WHERE org_id=? AND reason='duplicate_content'",
         (org_id,))["n"]
 

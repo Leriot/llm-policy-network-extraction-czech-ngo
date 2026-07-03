@@ -104,9 +104,9 @@ def org_detail(request: Request, org_id: str):
     if org is None:
         return HTMLResponse("unknown org", status_code=404)
     report = audit_mod.audit_org(db, org_id)
-    events = db.query(
+    events = db.read_query(
         "SELECT * FROM events WHERE org_id=? ORDER BY id DESC LIMIT 50", (org_id,))
-    failures = db.query(
+    failures = db.read_query(
         "SELECT url, http_status, last_error, retries FROM urls "
         "WHERE org_id=? AND status='failed' ORDER BY id DESC LIMIT 50", (org_id,))
     scope_rules = json.loads(org["scope"] or "[]")
@@ -130,7 +130,7 @@ def curation(request: Request):
 
 @app.get("/events", response_class=HTMLResponse)
 def events_page(request: Request):
-    events = db.query(
+    events = db.read_query(
         "SELECT * FROM events ORDER BY id DESC LIMIT 300")
     return templates.TemplateResponse(request, "events.html", {"events": events})
 
@@ -257,7 +257,7 @@ def _csv_response(filename: str, header: list, rows) -> PlainTextResponse:
 
 @app.get("/org/{org_id}/report/failed.csv")
 def report_failed(org_id: str):
-    rows = db.query(
+    rows = db.read_query(
         """SELECT url, http_status, last_error, retries, discovered_at, fetched_at
            FROM urls WHERE org_id=? AND status='failed' ORDER BY http_status, url""",
         (org_id,))
@@ -272,7 +272,7 @@ def report_failed(org_id: str):
 def report_deleted(org_id: str):
     """Pages we hold an archived snapshot of that now return 404/410 — i.e.
     content the organisation has since removed from its site."""
-    rows = db.query(
+    rows = db.read_query(
         """SELECT u.url, u.http_status, u.fetched_at last_attempt,
                   p.file_path, p.fetched_at snapshot_taken, p.doc_id
            FROM urls u
@@ -298,5 +298,5 @@ async def api_backup():
 
 @app.get("/healthz")
 def healthz():
-    db.query_one("SELECT 1")
+    db.read_query_one("SELECT 1")
     return {"ok": True, "running_orgs": manager.running_count()}
