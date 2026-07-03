@@ -466,6 +466,20 @@ class Database:
         )
 
     # ------------------------------------------------------------------ stats
+    def _ttl_cached(self, key: str, ttl: float, fn):
+        """Serve dashboard aggregates from a short-lived cache — full-table
+        scans over millions of rows must not run on every 10s UI poll."""
+        cache = getattr(self, "_ttl_cache", None)
+        if cache is None:
+            cache = self._ttl_cache = {}
+        hit = cache.get(key)
+        now = time.monotonic()
+        if hit and now - hit[0] < ttl:
+            return hit[1]
+        value = fn()
+        cache[key] = (time.monotonic(), value)
+        return value
+
     def org_stats(self, org_id: str) -> Dict[str, Any]:
         counts = {r["status"]: r["n"] for r in self.query(
             "SELECT status, COUNT(*) n FROM urls WHERE org_id=? GROUP BY status", (org_id,)
@@ -487,6 +501,9 @@ class Database:
         }
 
     def all_org_stats(self) -> Dict[str, Dict[str, Any]]:
+        return self._ttl_cached("all_org_stats", 30, self._all_org_stats)
+
+    def _all_org_stats(self) -> Dict[str, Dict[str, Any]]:
         """Stats for every org in four GROUP BY queries (dashboard polling)."""
         stats: Dict[str, Dict[str, Any]] = {}
 
@@ -516,7 +533,7 @@ class Database:
         # refreshed at most once a minute instead of on every dashboard poll
         now = time.monotonic()
         cached = getattr(self, "_links_cache", None)
-        if cached is None or now - cached[0] > 60:
+        if cached is None or now - cached[0] > 300:
             counts = {r["org_id"]: r["n"] for r in self.query(
                 "SELECT org_id, COUNT(*) n FROM links GROUP BY org_id")}
             self._links_cache = (now, counts)
@@ -525,6 +542,9 @@ class Database:
         return stats
 
     def global_stats(self) -> Dict[str, Any]:
+        return self._ttl_cached("global_stats", 30, self._global_stats)
+
+    def _global_stats(self) -> Dict[str, Any]:
         by_status = {r["status"]: r["n"] for r in self.query(
             "SELECT status, COUNT(*) n FROM urls GROUP BY status"
         )}
