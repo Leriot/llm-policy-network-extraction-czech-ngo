@@ -39,6 +39,19 @@ async def _nightly_backup():
             db.add_event(None, "error", f"database backup FAILED: {e}")
 
 
+async def _auto_resume():
+    """Resume cooldown-paused orgs whose backoff has elapsed."""
+    import asyncio
+    while True:
+        await asyncio.sleep(120)
+        try:
+            n = manager.resume_due()
+            if n:
+                logger.info(f"auto-resumed {n} cooled-down orgs")
+        except Exception as e:
+            logger.warning(f"auto-resume check failed: {e}")
+
+
 async def _db_size_watchdog():
     """Pause everything if the DB crosses the size threshold — a guaranteed
     human decision point instead of a full SSD (user decision)."""
@@ -74,8 +87,10 @@ async def lifespan(app: FastAPI):
     await manager.startup()
     backup_task = asyncio.create_task(_nightly_backup())
     watchdog_task = asyncio.create_task(_db_size_watchdog())
+    resume_task = asyncio.create_task(_auto_resume())
     logger.info(f"dashboard up — data dir {config.DATA_DIR.resolve()}")
     yield
+    resume_task.cancel()
     watchdog_task.cancel()
     backup_task.cancel()
     await manager.shutdown()

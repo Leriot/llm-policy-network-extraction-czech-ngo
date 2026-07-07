@@ -186,19 +186,24 @@ class OrgCrawler:
             if row["source"] == "seed" and row["depth"] == 0:
                 self.db.add_event(self.org_id, "error",
                                   f"SEED fetch failed ({result.error}) — check URL/scope/engine")
-            # Connection-level failures (refused/timeout, no HTTP response) on a
-            # host that worked before usually mean WE are being rate-limited.
-            # Politeness: back off increasingly, and stop knocking entirely
-            # after a streak — the URLs stay pending for a later resume.
+            # Connection-level failures (no HTTP response — refusal, DNS blip,
+            # or timeout). A streak means the host is unreachable *for now*:
+            # could be rate-limiting on their side or a transient DNS/network
+            # hiccup on ours. Back off, then pause with an auto-resume time so
+            # the org heals itself instead of parking permanently.
             if result.status_code is None:
                 self.consecutive_conn_failures += 1
-                if self.consecutive_conn_failures >= 10:
-                    self.db.set_org_fields(self.org_id, state="paused")
+                if self.consecutive_conn_failures >= config.CONN_FAIL_THRESHOLD:
+                    resume_at = (datetime.now(timezone.utc)
+                                 + timedelta(minutes=config.COOLDOWN_MINUTES))
+                    resume_iso = resume_at.strftime("%Y-%m-%dT%H:%M:%SZ")
+                    self.db.set_org_fields(self.org_id, state="paused",
+                                           resume_after=resume_iso)
                     self.db.add_event(
                         self.org_id, "warning",
-                        f"{self.consecutive_conn_failures} consecutive connection "
-                        f"failures — server refusing us; paused for politeness. "
-                        f"Resume in a few hours (frontier is preserved).")
+                        f"{self.consecutive_conn_failures} consecutive unreachable "
+                        f"fetches (last: {result.error[:60]}) — cooling down, "
+                        f"auto-resume ~{resume_iso[11:16]} UTC. Frontier preserved.")
                     return
                 await asyncio.sleep(min(30 * self.consecutive_conn_failures, 180))
             else:

@@ -53,7 +53,8 @@ class CrawlManager:
         existing = self.tasks.get(org_id)
         if existing and not existing.done():
             return "already running"
-        self.db.set_org_fields(org_id, state="queued")
+        # clearing resume_after: an explicit start cancels any pending cooldown
+        self.db.set_org_fields(org_id, state="queued", resume_after=None)
         if not auto:
             self.db.add_event(org_id, "info", "start requested")
         self.tasks[org_id] = asyncio.create_task(self._worker(org_id))
@@ -63,9 +64,27 @@ class CrawlManager:
         org = self.db.get_org(org_id)
         if org is None:
             return "unknown org"
-        self.db.set_org_fields(org_id, state="paused")
+        # manual pause is sticky: no resume_after -> auto-resume never touches it
+        self.db.set_org_fields(org_id, state="paused", resume_after=None)
         self.db.add_event(org_id, "info", "pause requested")
         return "ok"
+
+    def resume_due(self) -> int:
+        """Restart orgs whose cooldown has elapsed. Called periodically by the
+        web layer. Only touches paused orgs with a resume_after in the past —
+        manual pauses (resume_after IS NULL) are left alone."""
+        from .db import now_iso
+        due = self.db.query(
+            "SELECT org_id FROM orgs WHERE state='paused' "
+            "AND resume_after IS NOT NULL AND resume_after <= ?",
+            (now_iso(),))
+        resumed = 0
+        for row in due:
+            if self.start_org(row["org_id"]) == "ok":
+                self.db.add_event(row["org_id"], "info",
+                                  "cooldown elapsed — auto-resumed")
+                resumed += 1
+        return resumed
 
     def start_all(self) -> int:
         started = 0

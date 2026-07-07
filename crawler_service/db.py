@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS orgs (
     flag_threshold INTEGER DEFAULT {flag_threshold},
     flagged INTEGER DEFAULT 0,
     accept_any_status INTEGER DEFAULT 0,
+    resume_after TEXT,
     page_seq INTEGER DEFAULT 0,
     notes TEXT DEFAULT '',
     created_at TEXT,
@@ -175,6 +176,8 @@ class Database:
             if "accept_any_status" not in org_cols:
                 self.conn.execute(
                     "ALTER TABLE orgs ADD COLUMN accept_any_status INTEGER DEFAULT 0")
+            if "resume_after" not in org_cols:
+                self.conn.execute("ALTER TABLE orgs ADD COLUMN resume_after TEXT")
             cols = {r[1] for r in self.conn.execute("PRAGMA table_info(pages)")}
             if "doc_id" not in cols:
                 self.conn.execute("ALTER TABLE pages ADD COLUMN doc_id TEXT")
@@ -298,7 +301,7 @@ class Database:
         allowed = {
             "seed_url", "url_verified", "scope", "engine", "state", "max_depth",
             "flag_threshold", "flagged", "notes", "page_seq", "dir_name", "aliases",
-            "accept_any_status",
+            "accept_any_status", "resume_after",
         }
         cols, vals = [], []
         for k, v in fields.items():

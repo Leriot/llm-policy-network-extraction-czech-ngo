@@ -63,6 +63,13 @@ DEV_MAX_PAGES = _env("CRAWLER_DEV_MAX_PAGES", 0)
 # disk. 0 disables.
 DB_PAUSE_GB = _env("CRAWLER_DB_PAUSE_GB", 45.0)
 
+# Connection-failure cooldown: after this many consecutive connection-level
+# failures (no HTTP response — refusal, DNS blip, timeout) an org backs off and
+# is auto-resumed after COOLDOWN_MINUTES. Self-healing, so a transient DNS or
+# network hiccup no longer parks an org permanently.
+CONN_FAIL_THRESHOLD = _env("CRAWLER_CONN_FAIL_THRESHOLD", 12)
+COOLDOWN_MINUTES = _env("CRAWLER_COOLDOWN_MINUTES", 45)
+
 # Web UI
 WEB_HOST = _env("CRAWLER_WEB_HOST", "0.0.0.0")
 WEB_PORT = _env("CRAWLER_WEB_PORT", 8055)
