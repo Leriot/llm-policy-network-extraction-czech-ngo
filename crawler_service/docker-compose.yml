@@ -23,8 +23,9 @@ services:
       CRAWLER_DELAY: "2.0"          # per-domain minimum; robots crawl-delay overrides upward
       CRAWLER_DELAY_JITTER: "3.0"   # random 0-3s added -> requests land 2-5s apart
       # politeness is per-domain, so org-level parallelism is free throughput;
-      # the Xeon E3 idles at 6 — 16 keeps single-core parse load comfortable
-      CRAWLER_MAX_CONCURRENT_ORGS: "16"
+      # the Xeon E3 idles at load ~2.4/8 at 16 — 24 clears the long-tail queue
+      # faster without stressing single-core parse load
+      CRAWLER_MAX_CONCURRENT_ORGS: "24"
       CRAWLER_MAX_DEPTH: "10"
       CRAWLER_FLAG_THRESHOLD: "50000"
       # CRAWLER_USER_AGENT: override if needed
