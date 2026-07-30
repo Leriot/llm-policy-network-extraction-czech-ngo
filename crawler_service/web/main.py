@@ -86,12 +86,11 @@ async def lifespan(app: FastAPI):
     db = Database()
     manager = CrawlManager(db)
     await manager.startup()
-    try:
-        SNAPSHOT["stats"] = await asyncio.to_thread(db._all_org_stats)
-        SNAPSHOT["gstats"] = await asyncio.to_thread(db._global_stats)
-        SNAPSHOT["ts"] = time.time()
-    except Exception as e:
-        logger.warning(f"initial stats snapshot failed: {e}")
+    # NOTE: do not compute the first snapshot here — awaiting it blocks
+    # application startup (uvicorn won't accept connections until lifespan
+    # yields), which is exactly the multi-second stall we're removing. The
+    # refresher runs its body immediately, so the snapshot lands shortly
+    # after boot while the UI is already served.
     stats_task = asyncio.create_task(_stats_refresher())
     backup_task = asyncio.create_task(_nightly_backup())
     watchdog_task = asyncio.create_task(_db_size_watchdog())

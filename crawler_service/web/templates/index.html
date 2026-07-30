@@ -3,11 +3,11 @@
 {% block content %}
 
 <div class="cards" id="gcards">
-  <div class="card"><div class="v" id="g-pages">{{ gstats.pages }}</div><div class="l">pages saved</div></div>
-  <div class="card"><div class="v" id="g-links">{{ gstats.links }}</div><div class="l">unique link targets</div></div>
-  <div class="card"><div class="v" id="g-files">{{ gstats.files }}</div><div class="l">file links (PDF…)</div></div>
-  <div class="card"><div class="v" id="g-pending">{{ gstats.urls_by_status.get('pending', 0) }}</div><div class="l">frontier pending</div></div>
-  <div class="card"><div class="v" id="g-failed">{{ gstats.urls_by_status.get('failed', 0) }}</div><div class="l">failed URLs</div></div>
+  <div class="card"><div class="v" id="g-pages">{{ gstats.get('pages', '…') }}</div><div class="l">pages saved</div></div>
+  <div class="card"><div class="v" id="g-links">{{ gstats.get('links', '…') }}</div><div class="l">unique link targets</div></div>
+  <div class="card"><div class="v" id="g-files">{{ gstats.get('files', '…') }}</div><div class="l">file links (PDF…)</div></div>
+  <div class="card"><div class="v" id="g-pending">{{ gstats.get('urls_by_status', {}).get('pending', '…') }}</div><div class="l">frontier pending</div></div>
+  <div class="card"><div class="v" id="g-failed">{{ gstats.get('urls_by_status', {}).get('failed', '…') }}</div><div class="l">failed URLs</div></div>
   <div class="card"><div class="v" id="g-running">{{ running }}/{{ max_concurrent }}</div><div class="l">orgs crawling</div></div>
 </div>
 
