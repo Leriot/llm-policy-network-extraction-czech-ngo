@@ -398,14 +398,19 @@ class Database:
         self._exec(f"UPDATE urls SET {', '.join(sets)} WHERE id=?", tuple(vals))
 
     def release_stale_claims(self, org_id: Optional[str] = None):
-        """Return crashed in_progress URLs to the frontier (called on startup)."""
-        if org_id:
+        """Return crashed in_progress URLs to the frontier (called on startup).
+
+        Always filters by org_id so the (org_id, status) index is usable. A
+        bare `WHERE status='in_progress'` has no index to lean on and degrades
+        into a full scan of a multi-million-row table, which blocked service
+        startup once the frontier grew.
+        """
+        orgs = ([org_id] if org_id else
+                [r["org_id"] for r in self.query("SELECT org_id FROM orgs")])
+        for oid in orgs:
             self._exec(
-                "UPDATE urls SET status='pending' WHERE status='in_progress' AND org_id=?",
-                (org_id,),
-            )
-        else:
-            self._exec("UPDATE urls SET status='pending' WHERE status='in_progress'")
+                "UPDATE urls SET status='pending' "
+                "WHERE org_id=? AND status='in_progress'", (oid,))
 
     def requeue_failed(self, org_id: str) -> int:
         cur = self._exec(
