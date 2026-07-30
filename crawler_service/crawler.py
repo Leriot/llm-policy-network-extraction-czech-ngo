@@ -18,7 +18,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import List, Optional
 
-from . import config, extractor, sitemap, urlnorm
+from . import config, extractor, sitemap, urlnorm, urlrules
 from .db import Database
 from .fetcher import BrowserFetcher, DomainRateLimiter, FetchResult, HttpFetcher
 from .robots import RobotsCache
@@ -87,6 +87,9 @@ class OrgCrawler:
                 if not normalized or not urlnorm.in_scope(normalized, scope):
                     continue
                 if urlnorm.file_extension(normalized) or urlnorm.is_binary_noise(normalized):
+                    continue
+                normalized = urlrules.canonicalize(normalized, self.org_id)
+                if urlrules.trap_reason(normalized, self.org_id):
                     continue
                 key = urlnorm.url_key(normalized)
                 if key in seen:
@@ -259,9 +262,12 @@ class OrgCrawler:
         for link in hyperlinks:
             if link["type"] != "internal":
                 continue
-            target = link["url"]
+            # collapse presentation-state permutations to one content address
+            # before the URL ever enters the frontier (see urlrules.py)
+            target = urlrules.canonicalize(link["url"], self.org_id)
             key = urlnorm.url_key(target)
-            reason = urlnorm.exclusion_reason(target)
+            reason = urlnorm.exclusion_reason(target) or urlrules.trap_reason(
+                target, self.org_id)
             if reason:
                 frontier_rows.append((self.org_id, target, key, "excluded",
                                       reason, "link", new_depth, url))
