@@ -3,6 +3,7 @@ error reporting, and audit views. LAN-only by design — no auth."""
 
 import json
 import logging
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from urllib.parse import quote_plus
@@ -85,11 +86,19 @@ async def lifespan(app: FastAPI):
     db = Database()
     manager = CrawlManager(db)
     await manager.startup()
+    try:
+        SNAPSHOT["stats"] = await asyncio.to_thread(db._all_org_stats)
+        SNAPSHOT["gstats"] = await asyncio.to_thread(db._global_stats)
+        SNAPSHOT["ts"] = time.time()
+    except Exception as e:
+        logger.warning(f"initial stats snapshot failed: {e}")
+    stats_task = asyncio.create_task(_stats_refresher())
     backup_task = asyncio.create_task(_nightly_backup())
     watchdog_task = asyncio.create_task(_db_size_watchdog())
     resume_task = asyncio.create_task(_auto_resume())
     logger.info(f"dashboard up — data dir {config.DATA_DIR.resolve()}")
     yield
+    stats_task.cancel()
     resume_task.cancel()
     watchdog_task.cancel()
     backup_task.cancel()
@@ -102,9 +111,29 @@ app = FastAPI(title="COMPON Crawler", lifespan=lifespan)
 STATE_ORDER = {"running": 0, "queued": 1, "error": 2, "blocked": 3, "paused": 4,
                "ready": 5, "new": 6, "done": 7}
 
+# Background-refreshed statistics snapshot. Request handlers NEVER run the
+# expensive aggregate queries themselves — they read this dict, so a page load
+# is instant even while a refresh is in flight against a multi-GB database.
+SNAPSHOT: dict = {"stats": {}, "gstats": {}, "ts": None, "age": None}
+
+
+async def _stats_refresher(interval: int = 20):
+    """Recompute dashboard aggregates off the request path, forever."""
+    import asyncio
+    while True:
+        try:
+            # call the uncached implementations: this loop *is* the cache
+            stats = await asyncio.to_thread(db._all_org_stats)
+            gstats = await asyncio.to_thread(db._global_stats)
+            SNAPSHOT["stats"], SNAPSHOT["gstats"] = stats, gstats
+            SNAPSHOT["ts"] = time.time()
+        except Exception as e:
+            logger.warning(f"stats refresh failed: {e}")
+        await asyncio.sleep(interval)
+
 
 def _org_rows():
-    stats = db.all_org_stats()
+    stats = SNAPSHOT["stats"]
     rows = []
     for org in db.list_orgs():
         s = stats.get(org["org_id"], {})
@@ -135,9 +164,10 @@ def _org_rows():
 def index(request: Request):
     return templates.TemplateResponse(request, "index.html", {
         "rows": _org_rows(),
-        "gstats": db.global_stats(),
+        "gstats": SNAPSHOT["gstats"],
         "running": manager.running_count(),
         "max_concurrent": config.MAX_CONCURRENT_ORGS,
+        "snap_age": int(time.time() - SNAPSHOT["ts"]) if SNAPSHOT["ts"] else None,
     })
 
 
@@ -181,8 +211,9 @@ def events_page(request: Request):
 # --------------------------------------------------------------------- API
 @app.get("/api/orgs")
 def api_orgs():
-    return JSONResponse({"rows": _org_rows(), "gstats": db.global_stats(),
-                         "running": manager.running_count()})
+    return JSONResponse({"rows": _org_rows(), "gstats": SNAPSHOT["gstats"],
+                         "running": manager.running_count(),
+                         "snap_age": int(time.time() - SNAPSHOT["ts"]) if SNAPSHOT["ts"] else None})
 
 
 @app.get("/api/audit/{org_id}")

@@ -26,7 +26,7 @@
   </tr></thead>
   <tbody id="org-tbody">
   {% for r in rows %}
-    <tr>
+    <tr data-org="{{ r.org_id }}">
       <td><a href="/org/{{ r.org_id }}">{{ r.org_id }}</a>{% if r.flagged %} <span class="flag" title="page threshold crossed — review scope">⚑</span>{% endif %}</td>
       <td><a href="/org/{{ r.org_id }}">{{ r.name }}</a></td>
       <td>{% if r.seed_url %}<a href="{{ r.seed_url }}" target="_blank" rel="noopener">{{ r.seed_url[:45] }}</a>
@@ -34,12 +34,12 @@
           {% else %}<span class="muted">— not set —</span>{% endif %}</td>
       <td><span class="badge st-{{ r.state }}">{{ r.state }}</span>
           {% if r.engine == 'browser' %}<span title="browser engine">🌐</span>{% endif %}</td>
-      <td class="num">{{ r.pages }}</td>
-      <td class="num">{{ r.pending - r.refetch_backlog }}</td>
-      <td class="num muted">{{ r.refetch_backlog }}</td>
-      <td class="num {% if r.failed %}lvl-error{% endif %}">{{ r.failed }}</td>
-      <td class="num muted">{{ r.excluded }}</td>
-      <td class="num">{{ r.files }}</td>
+      <td class="num" data-f="pages">{{ r.pages }}</td>
+      <td class="num" data-f="pending">{{ r.pending - r.refetch_backlog }}</td>
+      <td class="num muted" data-f="refetch">{{ r.refetch_backlog }}</td>
+      <td class="num {% if r.failed %}lvl-error{% endif %}" data-f="failed">{{ r.failed }}</td>
+      <td class="num muted" data-f="excluded">{{ r.excluded }}</td>
+      <td class="num" data-f="files">{{ r.files }}</td>
       <td class="muted">{{ (r.last_activity or '')[:16].replace('T',' ') }}</td>
       <td>
         {% if r.state in ('running', 'queued') %}
@@ -56,13 +56,44 @@
 
 {% block scripts %}
 <script>
-function post(url) { return fetch(url, {method: 'POST'}); }
-function refresh() { location.reload(); }
-// live-ish updates: reload the page every 10s unless the user is interacting
-let idle = 0;
-document.addEventListener('mousemove', () => idle = 0);
-document.addEventListener('keydown', () => idle = 0);
-setInterval(() => { idle += 1; if (idle >= 1) location.reload(); }, 10000);
-document.getElementById('hdr-status').textContent = 'auto-refresh 10s';
+const fmt = n => (n===null||n===undefined) ? '-' : Number(n).toLocaleString();
+function post(url){ return fetch(url,{method:'POST'}).then(tick); }
+function refresh(){ tick(); }
+
+async function tick(){
+  const st = document.getElementById('hdr-status');
+  try{
+    const r = await fetch('/api/orgs',{cache:'no-store'});
+    const d = await r.json();
+    const g = d.gstats || {};
+    const set=(id,v)=>{const e=document.getElementById(id); if(e) e.textContent=fmt(v);};
+    set('g-pages',g.pages); set('g-links',g.links); set('g-files',g.files);
+    set('g-pending',(g.urls_by_status||{})['pending']||0);
+    set('g-failed',(g.urls_by_status||{})['failed']||0);
+    const gr=document.getElementById('g-running');
+    if(gr) gr.textContent = d.running + '/{{ max_concurrent }}';
+    for(const row of (d.rows||[])){
+      const tr=document.querySelector('tr[data-org="'+row.org_id+'"]');
+      if(!tr) continue;
+      const put=(f,v)=>{const c=tr.querySelector('[data-f="'+f+'"]'); if(c) c.textContent=fmt(v);};
+      put('pages',row.pages);
+      put('pending',row.pending-row.refetch_backlog);
+      put('refetch',row.refetch_backlog);
+      put('failed',row.failed);
+      put('excluded',row.excluded);
+      put('files',row.files);
+      const b=tr.querySelector('.badge');
+      if(b && b.textContent.trim()!==row.state){
+        b.textContent=row.state; b.className='badge st-'+row.state;
+      }
+    }
+    const age = (d.snap_age===null||d.snap_age===undefined) ? '?' : d.snap_age;
+    st.textContent = 'live · counters '+age+'s old · '+new Date().toLocaleTimeString();
+  }catch(e){
+    if(st) st.textContent='update failed - retrying';
+  }
+}
+tick();
+setInterval(tick, 5000);
 </script>
 {% endblock %}
