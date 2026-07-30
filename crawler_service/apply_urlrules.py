@@ -22,7 +22,7 @@ import sys
 from collections import Counter
 from pathlib import Path
 
-from . import config, urlrules
+from . import config, urlnorm, urlrules
 
 BATCH = 20000
 
@@ -45,6 +45,7 @@ def process(conn, org_id, dry_run):
     """Returns (n_excluded, n_flagged_fetched, reasons Counter)."""
     reasons = Counter()
     excluded = flagged = 0
+    dupes = [0]          # list so the inner loop can mutate it
 
     def scan(status):
         """Stream rows in id-ranges so a 2M-row org never lands in memory."""
@@ -75,14 +76,18 @@ def process(conn, org_id, dry_run):
             continue
         conn.executemany(
             "UPDATE urls SET status='excluded', reason=? WHERE id=?", to_exclude)
-        # a canonicalised URL may collide with an existing row: record it as a
-        # duplicate rather than losing the row to an IntegrityError
+        # Dedup identity lives in url_key (UNIQUE(org_id, url_key)), so the key
+        # MUST be recomputed too — otherwise canonicalised twins keep their old
+        # distinct keys and never collapse. Collisions mean "another row already
+        # holds this content address": mark this one as a duplicate.
         for canon, rid in to_canon:
             try:
-                conn.execute("UPDATE urls SET url=? WHERE id=?", (canon, rid))
+                conn.execute("UPDATE urls SET url=?, url_key=? WHERE id=?",
+                             (canon, urlnorm.url_key(canon), rid))
             except sqlite3.IntegrityError:
                 conn.execute("UPDATE urls SET status='excluded', "
                              "reason='canonical_duplicate' WHERE id=?", (rid,))
+                dupes[0] += 1
         conn.commit()
 
     # ---- already fetched: flag only (never delete, never re-status) ------
@@ -95,6 +100,9 @@ def process(conn, org_id, dry_run):
         conn.executemany("UPDATE urls SET out_of_scope=1 WHERE id=?", to_flag)
         conn.commit()
 
+    if dupes[0]:
+        reasons["canonical_duplicate"] = dupes[0]
+        excluded += dupes[0]
     return excluded, flagged, reasons
 
 
