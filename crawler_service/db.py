@@ -610,13 +610,14 @@ class Database:
                 "links": 0, "last_activity": None,
             })
 
+        # NOTE: deliberately no MAX(fetched_at) here. fetched_at is not in
+        # idx_urls_org_status, so including it forces a row lookup for every
+        # one of ~7M rows: measured 310s vs 5.3s for the index-only counts.
+        # last_activity is refreshed separately on a slower cadence.
         for r in self.read_query(
-                "SELECT org_id, status, COUNT(*) n, MAX(fetched_at) t "
-                "FROM urls GROUP BY org_id, status"):
+                "SELECT org_id, status, COUNT(*) n FROM urls GROUP BY org_id, status"):
             b = bucket(r["org_id"])
             b[r["status"]] = r["n"]
-            if r["t"] and (b["last_activity"] is None or r["t"] > b["last_activity"]):
-                b["last_activity"] = r["t"]
         for r in self.read_query(
                 "SELECT org_id, COUNT(*) n FROM urls "
                 "WHERE status='pending' AND refetch=1 GROUP BY org_id"):
@@ -637,6 +638,11 @@ class Database:
             bucket(org_id)["links"] = n
         return stats
 
+    def last_activity_map(self) -> Dict[str, str]:
+        """Most recent page timestamp per org (~80s — refresh on a slow loop)."""
+        return {r["org_id"]: r["t"] for r in self.read_query(
+            "SELECT org_id, MAX(fetched_at) t FROM pages GROUP BY org_id")}
+
     def global_stats(self) -> Dict[str, Any]:
         return self._ttl_cached("global_stats", 30, self._global_stats)
 
@@ -649,9 +655,7 @@ class Database:
         cached = getattr(self, "_links_cache", None)
         links = sum(cached[1].values()) if cached else \
             self.read_query_one("SELECT COUNT(*) n FROM links")["n"]
-        recent = self.read_query_one(
-            "SELECT COUNT(*) n FROM urls WHERE fetched_at > ?",
-            (datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:") + "00:00Z",),
-        )["n"]
+        # `fetched_at` is unindexed, so counting recent fetches is a full scan
+        # of a multi-million-row table. It is not worth a full scan per refresh.
         return {"urls_by_status": by_status, "pages": pages, "files": files,
-                "links": links, "fetched_this_hour": recent}
+                "links": links}

@@ -116,16 +116,32 @@ STATE_ORDER = {"running": 0, "queued": 1, "error": 2, "blocked": 3, "paused": 4,
 SNAPSHOT: dict = {"stats": {}, "gstats": {}, "ts": None, "age": None}
 
 
-async def _stats_refresher(interval: int = 20):
-    """Recompute dashboard aggregates off the request path, forever."""
+async def _stats_refresher(interval: int = 20, slow_every: int = 20):
+    """Recompute dashboard aggregates off the request path, forever.
+
+    Counts are index-only and cheap (~12s). last_activity needs MAX(fetched_at)
+    over the pages table (~80s), so it rides a much slower cadence and is
+    merged into the same snapshot.
+    """
     import asyncio
+    cycle = 0
+    last_act: dict = {}
     while True:
         try:
             # call the uncached implementations: this loop *is* the cache
             stats = await asyncio.to_thread(db._all_org_stats)
             gstats = await asyncio.to_thread(db._global_stats)
+            if cycle % slow_every == 0:
+                try:
+                    last_act = await asyncio.to_thread(db.last_activity_map)
+                except Exception as e:
+                    logger.warning(f"last_activity refresh failed: {e}")
+            for oid, t in last_act.items():
+                if oid in stats:
+                    stats[oid]["last_activity"] = t
             SNAPSHOT["stats"], SNAPSHOT["gstats"] = stats, gstats
             SNAPSHOT["ts"] = time.time()
+            cycle += 1
         except Exception as e:
             logger.warning(f"stats refresh failed: {e}")
         await asyncio.sleep(interval)
