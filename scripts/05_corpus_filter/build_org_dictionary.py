@@ -125,10 +125,19 @@ MANUAL_ABBREV = {
     # NOTE CZ050 (PrF UK) and CZ073 (PrF UJEP) are BOTH "Prirodovedecka
     # fakulta" — the bare phrase cannot separate them, so each requires its
     # university qualifier. Flagged for human review.
+    # Both kept as distinct actors (Prague vs Usti nad Labem) per user decision.
+    # The bare phrase "prirodovedecka fakulta" cannot separate them, so each
+    # needs its university qualifier; several surface forms for recall.
     "CZ050": [("prirodovedecka fakulta univerzity karlovy", "ci"),
-              ("prirodovedecke fakulty uk", "ci")],
+              ("prirodovedecke fakulty univerzity karlovy", "ci"),
+              ("prirodovedecka fakulta uk", "ci"),
+              ("prirodovedecke fakulty uk", "ci"),
+              ("natur.cuni", "ci")],
     "CZ073": [("prirodovedecka fakulta ujep", "ci"),
-              ("prirodovedecke fakulty ujep", "ci")],
+              ("prirodovedecke fakulty ujep", "ci"),
+              ("prirodovedecka fakulta univerzity j. e. purkyne", "ci"),
+              ("prirodovedecka fakulta ujep v usti nad labem", "ci"),
+              ("prf.ujep", "ci")],
 }
 
 # Measured breadth from verify_org_dictionary.py (share of a 12,735-page random

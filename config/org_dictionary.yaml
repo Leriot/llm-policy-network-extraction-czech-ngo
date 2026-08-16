@@ -562,7 +562,16 @@ CZ050:
     text: prirodovedecka fakulta univerzity karlovy
   - kind: manual
     mode: ci
+    text: prirodovedecke fakulty univerzity karlovy
+  - kind: manual
+    mode: ci
+    text: prirodovedecka fakulta uk
+  - kind: manual
+    mode: ci
     text: prirodovedecke fakulty uk
+  - kind: manual
+    mode: ci
+    text: natur.cuni
   risk: HIGH
   risk_notes:
   - 'natur: very short case-insensitive pattern'
@@ -795,6 +804,15 @@ CZ073:
   - kind: manual
     mode: ci
     text: prirodovedecke fakulty ujep
+  - kind: manual
+    mode: ci
+    text: prirodovedecka fakulta univerzity j. e. purkyne
+  - kind: manual
+    mode: ci
+    text: prirodovedecka fakulta ujep v usti nad labem
+  - kind: manual
+    mode: ci
+    text: prf.ujep
   risk: review
   risk_notes: []
   seed_url: https://prf.ujep.cz/

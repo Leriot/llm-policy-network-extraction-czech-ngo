@@ -131,6 +131,56 @@ keywords:
       description: "Support/Sponsorship"
 
   # ========================================
+  # 5. FUNDING PROGRAMMES  (added for the 119-org run)
+  # NOT part of the frozen co-occurrence gate — recorded as tie EVIDENCE and as
+  # features for the collaboration typology. Institutional collaboration is very
+  # often stated through a shared programme ("realizovano v ramci OPZP ve
+  # spolupraci s ..."), which the original 19-ENGO list had no terms for.
+  # Only verified Czech/EU instruments are listed.
+  # ========================================
+  funding_programmes:
+    - root: "OPŽP"
+      weight: 4
+      variations: ["OPŽP", "Operační program Životní prostředí"]
+      description: "Operational Programme Environment"
+    - root: "SFŽP"
+      weight: 4
+      variations: ["SFŽP", "Státní fond životního prostředí"]
+      description: "State Environmental Fund"
+    - root: "Modernizační fond"
+      weight: 4
+      variations: ["Modernizační fond", "ModF"]
+      description: "Modernisation Fund (EU ETS revenues)"
+    - root: "Národní plán obnovy"
+      weight: 4
+      variations: ["Národní plán obnovy", "NPO"]
+      description: "National Recovery Plan"
+    - root: "LIFE"
+      weight: 3
+      variations: ["program LIFE", "projekt LIFE"]
+      description: "EU LIFE programme (phrase-bound: bare LIFE is ambiguous)"
+    - root: "Horizon"
+      weight: 3
+      variations: ["Horizon Europe", "Horizont Evropa", "Horizon 2020"]
+      description: "EU research framework programme"
+    - root: "Norské fondy"
+      weight: 3
+      variations: ["Norské fondy", "EHP a Norské fondy", "EEA Grants"]
+      description: "EEA/Norway Grants"
+    - root: "Interreg"
+      weight: 3
+      variations: ["Interreg"]
+      description: "EU territorial cooperation"
+    - root: "TAČR"
+      weight: 3
+      variations: ["TAČR", "Technologická agentura"]
+      description: "Technology Agency CR"
+    - root: "GAČR"
+      weight: 3
+      variations: ["GAČR", "Grantová agentura"]
+      description: "Czech Science Foundation"
+
+  # ========================================
   # 3. POLICY ACTORS (Network Nodes)
   # ========================================
   actors:
