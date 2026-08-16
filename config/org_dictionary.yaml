@@ -1,0 +1,1611 @@
+# Organisation matching dictionary — REVIEW BEFORE USE.
+# mode: ci = case-insensitive (folded), cs = case-sensitive (abbreviations)
+# risk: HIGH = pattern collides with common Czech words; check before enabling
+CZ001:
+  name: Sdruzeni automobiloveho prumyslu
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: sdruzeni automobiloveho prumyslu
+  - kind: domain
+    mode: ci
+    text: autosap
+  risk: review
+  risk_notes: []
+  seed_url: https://autosap.cz/
+  verified: false
+CZ002:
+  name: Agrarni komora CR
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: agrarni komora cr
+  - kind: domain
+    mode: ci
+    text: akcr
+  risk: HIGH
+  risk_notes:
+  - 'akcr: very short case-insensitive pattern'
+  seed_url: https://www.akcr.cz/
+  verified: false
+CZ004:
+  name: Aliance pro energetickou sobestacnost
+  patterns:
+  - kind: thesis
+    mode: cs
+    text: AliES
+  - kind: fullname
+    mode: ci
+    text: aliance pro energetickou sobestacnost
+  - kind: domain
+    mode: ci
+    text: alies
+  risk: HIGH
+  risk_notes:
+  - 'alies: very short case-insensitive pattern'
+  seed_url: https://www.alies.cz/
+  verified: true
+CZ005:
+  name: Zemedelsky svaz CR
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: zemedelsky svaz cr
+  - kind: domain
+    mode: ci
+    text: zscr
+  risk: HIGH
+  risk_notes:
+  - 'zscr: very short case-insensitive pattern'
+  seed_url: https://www.zscr.cz/
+  verified: false
+CZ007:
+  name: ANO 2011
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: ano 2011
+  - kind: domain
+    mode: ci
+    text: anobudelip
+  - kind: manual
+    mode: ci
+    text: hnuti ANO
+  risk: review
+  risk_notes: []
+  seed_url: https://www.anobudelip.cz/
+  verified: false
+CZ009:
+  name: Arnika
+  patterns:
+  - kind: thesis
+    mode: ci
+    text: arnik
+  - kind: fullname
+    mode: ci
+    text: arnika
+  risk: HIGH
+  risk_notes:
+  - 'arnik: very short case-insensitive pattern'
+  seed_url: https://www.arnika.org/
+  verified: true
+CZ010:
+  name: Autoklub CR
+  patterns:
+  - kind: thesis
+    mode: ci
+    text: autoklub
+  - kind: fullname
+    mode: ci
+    text: autoklub cr
+  risk: validated
+  risk_notes: []
+  seed_url: https://www.autoklub.cz/
+  verified: true
+CZ011:
+  name: Beleco
+  patterns:
+  - kind: thesis
+    mode: ci
+    text: belec
+  - kind: fullname
+    mode: ci
+    text: beleco
+  risk: HIGH
+  risk_notes:
+  - 'belec: very short case-insensitive pattern'
+  seed_url: https://beleco.cz/
+  verified: true
+CZ012:
+  name: CZ Biom - Ceske sdruzeni pro biomasu
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: cz biom
+  - kind: domain
+    mode: ci
+    text: biom
+  risk: HIGH
+  risk_notes:
+  - 'biom: very short case-insensitive pattern'
+  seed_url: https://biom.cz/
+  verified: false
+CZ013:
+  name: Brno
+  patterns:
+  - kind: manual
+    mode: ci
+    text: magistrat mesta brna
+  - kind: manual
+    mode: ci
+    text: statutarni mesto brno
+  risk: review
+  risk_notes: []
+  seed_url: https://www.brno.cz/
+  verified: false
+CZ014:
+  name: Cesky antarkticky nadacni fond
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: cesky antarkticky nadacni fond
+  - kind: domain
+    mode: ci
+    text: antarcticfoundation
+  risk: review
+  risk_notes: []
+  seed_url: https://www.antarcticfoundation.cz/
+  verified: false
+CZ015:
+  name: Calla - Sdruzeni pro zachranu prostredi
+  patterns:
+  - kind: thesis
+    mode: ci
+    text: calla
+  - kind: thesis
+    mode: ci
+    text: cally
+  - kind: thesis
+    mode: ci
+    text: calle
+  - kind: stem
+    mode: ci
+    text: call
+  risk: HIGH
+  risk_notes:
+  - 'calla: very short case-insensitive pattern'
+  - 'cally: very short case-insensitive pattern'
+  - 'calle: very short case-insensitive pattern'
+  - 'call: very short case-insensitive pattern'
+  seed_url: https://www.calla.cz/
+  verified: true
+CZ018:
+  name: Stredocesky kraj
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: stredocesky kraj
+  - kind: domain
+    mode: ci
+    text: stredoceskykraj
+  risk: review
+  risk_notes: []
+  seed_url: https://www.stredoceskykraj.cz/
+  verified: false
+CZ019:
+  name: Klimaticka koalice
+  patterns:
+  - kind: thesis
+    mode: ci
+    text: klimaticka koalic
+  - kind: thesis
+    mode: ci
+    text: klimaticke koalic
+  - kind: fullname
+    mode: ci
+    text: klimaticka koalice
+  - kind: domain
+    mode: ci
+    text: klimatickakoalice
+  risk: validated
+  risk_notes: []
+  seed_url: https://klimatickakoalice.cz/
+  verified: true
+CZ020:
+  name: Centrum pro dopravu a energetiku
+  patterns:
+  - kind: thesis
+    mode: cs
+    text: CDE
+  - kind: thesis
+    mode: ci
+    text: centrum pro dopravu
+  - kind: fullname
+    mode: ci
+    text: centrum pro dopravu a energetiku
+  - kind: domain
+    mode: ci
+    text: cde-org
+  risk: validated
+  risk_notes: []
+  seed_url: https://www.cde-org.cz/cs
+  verified: true
+CZ021:
+  name: Konfederace zamestnavatelskych a podnikatelskych svazu CR
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: konfederace zamestnavatelskych a podnikatelskych svazu cr
+  - kind: domain
+    mode: ci
+    text: kzps
+  risk: HIGH
+  risk_notes:
+  - 'kzps: very short case-insensitive pattern'
+  seed_url: https://www.kzps.cz/
+  verified: false
+CZ022:
+  name: Vlada (Odbor koordinace evropskych politik) Evropské záležitosti
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: vlada (odbor koordinace evropskych politik) evropske zalezitosti
+  risk: review
+  risk_notes: []
+  seed_url: ''
+  verified: false
+CZ024:
+  name: CEZ Group
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: cez group
+  - kind: manual
+    mode: cs
+    text: CEZ
+  risk: review
+  risk_notes: []
+  seed_url: https://www.cez.cz/
+  verified: false
+CZ025:
+  name: Sance pro budovy
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: sance pro budovy
+  - kind: domain
+    mode: ci
+    text: sanceprobudovy
+  risk: review
+  risk_notes: []
+  seed_url: https://sanceprobudovy.cz/
+  verified: false
+CZ026:
+  name: Centrum vyzkumu globalni zmeny, Akademie ved
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: centrum vyzkumu globalni zmeny, akademie ved
+  - kind: domain
+    mode: ci
+    text: czechglobe
+  risk: review
+  risk_notes: []
+  seed_url: https://www.czechglobe.cz/
+  verified: false
+CZ027:
+  name: Ceska geologicka sluzba
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: ceska geologicka sluzba
+  risk: review
+  risk_notes: []
+  seed_url: https://cgs.gov.cz/
+  verified: false
+CZ028:
+  name: Teplarenske sdruzeni CR
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: teplarenske sdruzeni cr
+  - kind: domain
+    mode: ci
+    text: tscr
+  risk: HIGH
+  risk_notes:
+  - 'tscr: very short case-insensitive pattern'
+  seed_url: https://www.tscr.cz/
+  verified: false
+CZ029:
+  name: Cesky hydrometeorologicky ustav, Akademie ved
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: cesky hydrometeorologicky ustav, akademie ved
+  - kind: domain
+    mode: ci
+    text: chmi
+  risk: HIGH
+  risk_notes:
+  - 'chmi: very short case-insensitive pattern'
+  seed_url: https://www.chmi.cz/
+  verified: false
+CZ031:
+  name: CI2
+  patterns:
+  - kind: thesis
+    mode: cs
+    text: CI2
+  risk: HIGH
+  risk_notes:
+  - 'CI2: low risk but very short'
+  seed_url: https://ci2.co.cz/cs
+  verified: true
+CZ032:
+  name: Cesko-moravska konfederace odborovych svazu
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: cesko-moravska konfederace odborovych svazu
+  - kind: domain
+    mode: ci
+    text: cmkos
+  risk: HIGH
+  risk_notes:
+  - 'cmkos: very short case-insensitive pattern'
+  seed_url: https://www.cmkos.cz/
+  verified: false
+CZ033:
+  name: Cesky plynarensky svaz
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: cesky plynarensky svaz
+  - kind: domain
+    mode: ci
+    text: cgoa
+  risk: HIGH
+  risk_notes:
+  - 'cgoa: very short case-insensitive pattern'
+  seed_url: https://www.cgoa.cz/
+  verified: false
+CZ034:
+  name: Hospodarska komora České republiky
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: hospodarska komora ceske republiky
+  risk: review
+  risk_notes: []
+  seed_url: https://www.komora.cz/
+  verified: false
+CZ035:
+  name: Centrum pro otazky zivotniho prostredi, Karlova univerzita
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: centrum pro otazky zivotniho prostredi, karlova univerzita
+  - kind: manual
+    mode: ci
+    text: centrum pro otazky zivotniho prostredi
+  - kind: manual
+    mode: cs
+    text: COZP
+  risk: review
+  risk_notes: []
+  seed_url: https://www.czp.cuni.cz/
+  verified: false
+CZ036:
+  name: KSCM
+  patterns:
+  - kind: domain
+    mode: ci
+    text: kscm
+  - kind: manual
+    mode: cs
+    text: KSCM
+  risk: HIGH
+  risk_notes:
+  - 'kscm: very short case-insensitive pattern'
+  seed_url: https://www.kscm.cz/
+  verified: false
+CZ037:
+  name: Pakt starostu a primatoru
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: pakt starostu a primatoru
+  - kind: domain
+    mode: ci
+    text: pakt-starostu
+  risk: review
+  risk_notes: []
+  seed_url: https://www.pakt-starostu.cz/
+  verified: false
+CZ038:
+  name: Ceska fotovoltaicka asociace
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: ceska fotovoltaicka asociace
+  - kind: domain
+    mode: ci
+    text: cefas
+  risk: HIGH
+  risk_notes:
+  - 'cefas: very short case-insensitive pattern'
+  seed_url: https://cefas.cz/
+  verified: false
+CZ039:
+  name: Ceské drahy
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: ceske drahy
+  risk: review
+  risk_notes: []
+  seed_url: https://www.cd.cz/
+  verified: false
+CZ041:
+  name: Katedra environmentalnich studii, Masarykova univerzita
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: katedra environmentalnich studii, masarykova univerzita
+  - kind: manual
+    mode: ci
+    text: katedra environmentalnich studii
+  risk: review
+  risk_notes: []
+  seed_url: https://enviro.fss.muni.cz/
+  verified: false
+CZ042:
+  name: Katedra vojenske geografie a meteorologie, Univerzita obrany
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: katedra vojenske geografie a meteorologie, univerzita obrany
+  risk: review
+  risk_notes: []
+  seed_url: https://fvt.unob.cz/fakulta/struktura/katedra-vojenske-geografie-a-meteorologie-k-210
+  verified: false
+CZ043:
+  name: Katedra fyziky atmosfery, Karlova univerzita
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: katedra fyziky atmosfery, karlova univerzita
+  - kind: manual
+    mode: ci
+    text: katedra fyziky atmosfery
+  risk: review
+  risk_notes: []
+  seed_url: https://kfa.mff.cuni.cz/
+  verified: false
+CZ045:
+  name: Energeticka agentura Zlinskeho kraje
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: energeticka agentura zlinskeho kraje
+  - kind: domain
+    mode: ci
+    text: eazk
+  risk: HIGH
+  risk_notes:
+  - 'eazk: very short case-insensitive pattern'
+  seed_url: https://www.eazk.cz/
+  verified: false
+CZ046:
+  name: Odborovy svaz ECHO (odvetvi energetiky a chemie)
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: odborovy svaz echo (odvetvi energetiky a chemie)
+  - kind: domain
+    mode: ci
+    text: os-echo
+  risk: review
+  risk_notes: []
+  seed_url: https://os-echo.cz/
+  verified: false
+CZ047:
+  name: Institut pro ekonomickou a ekologickou politiku
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: institut pro ekonomickou a ekologickou politiku
+  - kind: domain
+    mode: ci
+    text: ieep
+  risk: HIGH
+  risk_notes:
+  - 'ieep: very short case-insensitive pattern'
+  seed_url: https://www.ieep.cz/
+  verified: false
+CZ048:
+  name: E.ON
+  patterns:
+  - kind: manual
+    mode: ci
+    text: E.ON
+  - kind: manual
+    mode: ci
+    text: eon energie
+  risk: HIGH
+  risk_notes:
+  - 'E.ON: very short case-insensitive pattern'
+  seed_url: https://www.eon.cz/
+  verified: false
+CZ049:
+  name: Energeticky regulacni urad
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: energeticky regulacni urad
+  risk: review
+  risk_notes: []
+  seed_url: https://eru.gov.cz/
+  verified: false
+CZ050:
+  name: Prirodovedecka fakulta, Karlova univerzita
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: prirodovedecka fakulta, karlova univerzita
+  - kind: domain
+    mode: ci
+    text: natur
+  - kind: manual
+    mode: ci
+    text: prirodovedecka fakulta univerzity karlovy
+  - kind: manual
+    mode: ci
+    text: prirodovedecke fakulty uk
+  risk: HIGH
+  risk_notes:
+  - 'natur: very short case-insensitive pattern'
+  seed_url: https://www.natur.cuni.cz/
+  verified: false
+CZ051:
+  name: Hnuti Duha
+  patterns:
+  - kind: thesis
+    mode: ci
+    text: hnuti duha
+  - kind: domain
+    mode: ci
+    text: hnutiduha
+  risk: validated
+  risk_notes: []
+  seed_url: https://www.hnutiduha.cz/
+  verified: true
+CZ052:
+  name: Frank Bold
+  patterns:
+  - kind: thesis
+    mode: ci
+    text: frank bold
+  - kind: domain
+    mode: ci
+    text: frankbold
+  risk: validated
+  risk_notes: []
+  seed_url: https://frankbold.org/
+  verified: true
+CZ053:
+  name: Geologicky ustav, Akademie ved
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: geologicky ustav, akademie ved
+  - kind: manual
+    mode: ci
+    text: geologicky ustav akademie ved
+  - kind: manual
+    mode: ci
+    text: geologicky ustav av
+  risk: review
+  risk_notes: []
+  seed_url: https://www.gli.cas.cz/
+  verified: false
+CZ054:
+  name: Glopolis
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: glopolis
+  risk: review
+  risk_notes: []
+  seed_url: https://glopolis.org/
+  verified: false
+CZ055:
+  name: Zeleny kruh
+  patterns:
+  - kind: thesis
+    mode: ci
+    text: zeleny kruh
+  - kind: thesis
+    mode: ci
+    text: zeleneho kruh
+  - kind: domain
+    mode: ci
+    text: zelenykruh
+  risk: validated
+  risk_notes: []
+  seed_url: https://zelenykruh.cz/
+  verified: true
+CZ056:
+  name: Greenpeace ČR
+  patterns:
+  - kind: thesis
+    mode: ci
+    text: greenpeace
+  - kind: fullname
+    mode: ci
+    text: greenpeace cr
+  risk: validated
+  risk_notes: []
+  seed_url: https://www.greenpeace.org/czech
+  verified: true
+CZ057:
+  name: Strana Zelenych
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: strana zelenych
+  - kind: domain
+    mode: ci
+    text: zeleni
+  - kind: manual
+    mode: cs
+    text: Zeleni
+  risk: review
+  risk_notes: []
+  seed_url: https://www.zeleni.cz/
+  verified: false
+CZ058:
+  name: Horni Jiretin
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: horni jiretin
+  - kind: domain
+    mode: ci
+    text: hornijiretin
+  risk: review
+  risk_notes: []
+  seed_url: https://www.hornijiretin.cz/
+  verified: false
+CZ059:
+  name: Kralovehradecky kraj
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: kralovehradecky kraj
+  risk: review
+  risk_notes: []
+  seed_url: https://www.khk.cz/
+  verified: false
+CZ061:
+  name: Hyundai Motor Manufacturing Czech
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: hyundai motor manufacturing czech
+  - kind: domain
+    mode: ci
+    text: hyundai-motor
+  risk: review
+  risk_notes: []
+  seed_url: https://hyundai-motor.cz/
+  verified: false
+CZ063:
+  name: Ustav fyziky atmosfery, Akademie ved
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: ustav fyziky atmosfery, akademie ved
+  - kind: manual
+    mode: ci
+    text: ustav fyziky atmosfery
+  risk: review
+  risk_notes: []
+  seed_url: https://www.ufa.cas.cz/
+  verified: false
+CZ065:
+  name: Ustav geologickych ved, Masarykova univerzita
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: ustav geologickych ved, masarykova univerzita
+  - kind: manual
+    mode: ci
+    text: ustav geologickych ved
+  risk: review
+  risk_notes: []
+  seed_url: https://ugv.sci.muni.cz/
+  verified: false
+CZ066:
+  name: Geograficky ustav, Masarykova univerzita
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: geograficky ustav, masarykova univerzita
+  - kind: domain
+    mode: ci
+    text: geogr
+  risk: HIGH
+  risk_notes:
+  - 'geogr: very short case-insensitive pattern'
+  seed_url: https://geogr.sci.muni.cz/
+  verified: false
+CZ068:
+  name: Institut pro politiku a spolecnost
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: institut pro politiku a spolecnost
+  - kind: domain
+    mode: ci
+    text: politikaspolecnost
+  risk: review
+  risk_notes: []
+  seed_url: https://www.politikaspolecnost.cz/
+  verified: false
+CZ071:
+  name: Vyzkumny ustav vodohospodarsky T. G. Masaryka
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: vyzkumny ustav vodohospodarsky t. g. masaryka
+  - kind: manual
+    mode: ci
+    text: vyzkumny ustav vodohospodarsky
+  - kind: manual
+    mode: ci
+    text: VUV TGM
+  risk: review
+  risk_notes: []
+  seed_url: https://www.vuv.cz/
+  verified: false
+CZ072:
+  name: Ustav vodního hospodarstvi krajiny, Vysoke uceni technicke v Brne
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: ustav vodniho hospodarstvi krajiny, vysoke uceni technicke v brne
+  - kind: manual
+    mode: ci
+    text: ustav vodniho hospodarstvi krajiny
+  risk: review
+  risk_notes: []
+  seed_url: https://www.fce.vutbr.cz/
+  verified: false
+CZ073:
+  name: Prirodovedecka fakulta, J.E. Purkyně
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: prirodovedecka fakulta, j.e. purkyne
+  - kind: manual
+    mode: ci
+    text: prirodovedecka fakulta ujep
+  - kind: manual
+    mode: ci
+    text: prirodovedecke fakulty ujep
+  risk: review
+  risk_notes: []
+  seed_url: https://prf.ujep.cz/
+  verified: false
+CZ075:
+  name: KDU-CSL
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: kdu-csl
+  - kind: manual
+    mode: cs
+    text: KDU-CSL
+  - kind: manual
+    mode: ci
+    text: lidovci
+  risk: review
+  risk_notes: []
+  seed_url: https://www.kdu.cz/
+  verified: false
+CZ076:
+  name: Karlovarsky kraj
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: karlovarsky kraj
+  - kind: domain
+    mode: ci
+    text: kr-karlovarsky
+  risk: review
+  risk_notes: []
+  seed_url: https://www.kr-karlovarsky.cz/
+  verified: false
+CZ077:
+  name: Liberecky kraj
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: liberecky kraj
+  - kind: domain
+    mode: ci
+    text: kraj-lbc
+  risk: review
+  risk_notes: []
+  seed_url: https://www.kraj-lbc.cz/
+  verified: false
+CZ078:
+  name: Litvinov
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: litvinov
+  - kind: domain
+    mode: ci
+    text: mulitvinov
+  risk: review
+  risk_notes: []
+  seed_url: https://www.mulitvinov.cz/
+  verified: false
+CZ079:
+  name: Ministerstvo zahranicnich veci
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: ministerstvo zahranicnich veci
+  - kind: manual
+    mode: cs
+    text: MZV
+  risk: review
+  risk_notes: []
+  seed_url: https://mzv.gov.cz/
+  verified: false
+CZ080:
+  name: Ministerstvo zivotniho prostredi
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: ministerstvo zivotniho prostredi
+  - kind: manual
+    mode: cs
+    text: MZP
+  risk: review
+  risk_notes: []
+  seed_url: https://mzp.gov.cz/
+  verified: false
+CZ081:
+  name: Ministerstvo dopravy
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: ministerstvo dopravy
+  risk: review
+  risk_notes: []
+  seed_url: https://md.gov.cz/
+  verified: false
+CZ082:
+  name: Ministerstvo financi
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: ministerstvo financi
+  risk: review
+  risk_notes: []
+  seed_url: https://mf.gov.cz/
+  verified: false
+CZ083:
+  name: Ministerstvo prumyslu a obchodu
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: ministerstvo prumyslu a obchodu
+  - kind: manual
+    mode: cs
+    text: MPO
+  risk: review
+  risk_notes: []
+  seed_url: https://mpo.gov.cz/
+  verified: false
+CZ084:
+  name: MND
+  patterns:
+  - kind: manual
+    mode: cs
+    text: MND
+  risk: HIGH
+  risk_notes:
+  - 'MND: short'
+  seed_url: https://www.mnd.eu/
+  verified: false
+CZ085:
+  name: Moravskoslezsky kraj
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: moravskoslezsky kraj
+  risk: review
+  risk_notes: []
+  seed_url: https://www.msk.cz/
+  verified: false
+CZ086:
+  name: Ministerstvo zemedelstvi
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: ministerstvo zemedelstvi
+  risk: review
+  risk_notes: []
+  seed_url: https://mze.gov.cz/
+  verified: false
+CZ087:
+  name: Nesehnuti
+  patterns:
+  - kind: thesis
+    mode: ci
+    text: nesehnut
+  - kind: fullname
+    mode: ci
+    text: nesehnuti
+  risk: validated
+  risk_notes: []
+  seed_url: https://nesehnuti.cz/
+  verified: true
+CZ090:
+  name: ODS
+  patterns:
+  - kind: manual
+    mode: cs
+    text: ODS
+  risk: HIGH
+  risk_notes:
+  - 'ODS: short'
+  seed_url: https://www.ods.cz/
+  verified: false
+CZ091:
+  name: Operator trhu s energiemi
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: operator trhu s energiemi
+  - kind: domain
+    mode: ci
+    text: ote-cr
+  - kind: manual
+    mode: cs
+    text: OTE
+  risk: HIGH
+  risk_notes:
+  - 'OTE: short'
+  seed_url: https://www.ote-cr.cz/
+  verified: false
+CZ093:
+  name: Olomoucky kraj
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: olomoucky kraj
+  - kind: domain
+    mode: ci
+    text: olkraj
+  risk: review
+  risk_notes: []
+  seed_url: https://www.olkraj.cz/
+  verified: false
+CZ094:
+  name: Ostrava (Pakt starostu a primatoru)
+  patterns:
+  - kind: manual
+    mode: ci
+    text: magistrat mesta ostravy
+  - kind: manual
+    mode: ci
+    text: statutarni mesto ostrava
+  risk: review
+  risk_notes: []
+  seed_url: https://www.ostrava.cz/
+  verified: false
+CZ095:
+  name: Pardubicky kraj
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: pardubicky kraj
+  - kind: domain
+    mode: ci
+    text: pardubickykraj
+  risk: review
+  risk_notes: []
+  seed_url: https://www.pardubickykraj.cz/
+  verified: false
+CZ096:
+  name: Solarni asociace
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: solarni asociace
+  - kind: domain
+    mode: ci
+    text: solarniasociace
+  risk: review
+  risk_notes: []
+  seed_url: https://www.solarniasociace.cz/
+  verified: false
+CZ097:
+  name: Plzensky kraj
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: plzensky kraj
+  - kind: domain
+    mode: ci
+    text: plzensky-kraj
+  risk: review
+  risk_notes: []
+  seed_url: https://www.plzensky-kraj.cz/
+  verified: false
+CZ098:
+  name: Praha
+  patterns:
+  - kind: manual
+    mode: ci
+    text: magistrat hlavniho mesta prahy
+  - kind: manual
+    mode: ci
+    text: hlavni mesto praha
+  - kind: manual
+    mode: ci
+    text: hl. m. praha
+  risk: review
+  risk_notes: []
+  seed_url: https://www.praha.eu/
+  verified: false
+CZ099:
+  name: Vlada (premier) (Kajzler)
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: vlada (premier) (kajzler)
+  - kind: domain
+    mode: ci
+    text: vlada
+  risk: HIGH
+  risk_notes:
+  - 'vlada: very short case-insensitive pattern'
+  seed_url: https://vlada.gov.cz/
+  verified: false
+CZ100:
+  name: CEPRO
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: cepro
+  - kind: stem
+    mode: ci
+    text: cepr
+  - kind: domain
+    mode: ci
+    text: ceproas
+  risk: HIGH
+  risk_notes:
+  - 'cepro: very short case-insensitive pattern'
+  - 'cepr: very short case-insensitive pattern'
+  seed_url: https://www.ceproas.cz/
+  verified: false
+CZ103:
+  name: Innogy
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: innogy
+  - kind: stem
+    mode: ci
+    text: innog
+  risk: HIGH
+  risk_notes:
+  - 'innog: very short case-insensitive pattern'
+  seed_url: https://www.innogy.cz/
+  verified: false
+CZ104:
+  name: Jihocesky kraj
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: jihocesky kraj
+  - kind: domain
+    mode: ci
+    text: kraj-jihocesky
+  risk: review
+  risk_notes: []
+  seed_url: https://www.kraj-jihocesky.cz/
+  verified: false
+CZ105:
+  name: Statni energeticka inspekce
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: statni energeticka inspekce
+  risk: review
+  risk_notes: []
+  seed_url: https://sei.gov.cz/
+  verified: false
+CZ106:
+  name: Sev.en
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: sev.en
+  risk: review
+  risk_notes: []
+  seed_url: https://www.7.cz/
+  verified: false
+CZ107:
+  name: Skoda Auto
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: skoda auto
+  - kind: domain
+    mode: ci
+    text: skoda-auto
+  risk: review
+  risk_notes: []
+  seed_url: https://www.skoda-auto.cz/
+  verified: false
+CZ108:
+  name: Jihomoravsky kraj
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: jihomoravsky kraj
+  risk: review
+  risk_notes: []
+  seed_url: https://www.jmk.cz/
+  verified: false
+CZ109:
+  name: SOCDEM
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: socdem
+  - kind: manual
+    mode: cs
+    text: SOCDEM
+  - kind: manual
+    mode: cs
+    text: CSSD
+  risk: review
+  risk_notes: []
+  seed_url: https://www.socdem.cz/
+  verified: false
+CZ110:
+  name: Sokolovská uhelna
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: sokolovska uhelna
+  - kind: domain
+    mode: ci
+    text: suas
+  risk: HIGH
+  risk_notes:
+  - 'suas: very short case-insensitive pattern'
+  seed_url: https://www.suas.cz/
+  verified: false
+CZ111:
+  name: Spolchemie
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: spolchemie
+  - kind: stem
+    mode: ci
+    text: spolchem
+  risk: review
+  risk_notes: []
+  seed_url: https://www.spolchemie.cz/
+  verified: false
+CZ113:
+  name: Trinecke zelezarny
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: trinecke zelezarny
+  risk: review
+  risk_notes: []
+  seed_url: https://www.trz.cz/
+  verified: false
+CZ114:
+  name: TOP 09
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: top 09
+  - kind: domain
+    mode: ci
+    text: top09
+  risk: HIGH
+  risk_notes:
+  - 'top09: very short case-insensitive pattern'
+  seed_url: https://www.top09.cz/
+  verified: false
+CZ115:
+  name: Toyota motor manufacturing  Czech Republic
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: toyota motor manufacturing  czech republic
+  - kind: domain
+    mode: ci
+    text: toyotacz
+  risk: review
+  risk_notes: []
+  seed_url: https://www.toyotacz.com/
+  verified: false
+CZ118:
+  name: Svaz chemickeho prumyslu CR
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: svaz chemickeho prumyslu cr
+  - kind: domain
+    mode: ci
+    text: schp
+  risk: HIGH
+  risk_notes:
+  - 'schp: very short case-insensitive pattern'
+  seed_url: https://www.schp.cz/
+  verified: false
+CZ119:
+  name: Svaz mest a obci CR
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: svaz mest a obci cr
+  - kind: domain
+    mode: ci
+    text: smocr
+  risk: HIGH
+  risk_notes:
+  - 'smocr: very short case-insensitive pattern'
+  seed_url: https://www.smocr.cz/
+  verified: false
+CZ121:
+  name: Odborovy svaz pracovniku kultury a ochrany prirody
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: odborovy svaz pracovniku kultury a ochrany prirody
+  - kind: domain
+    mode: ci
+    text: ospkop
+  risk: review
+  risk_notes: []
+  seed_url: https://www.ospkop.cz/
+  verified: false
+CZ122:
+  name: Svaz prumyslu a dopravy CR
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: svaz prumyslu a dopravy cr
+  - kind: domain
+    mode: ci
+    text: spcr
+  risk: HIGH
+  risk_notes:
+  - 'spcr: very short case-insensitive pattern'
+  seed_url: https://www.spcr.cz/
+  verified: false
+CZ123:
+  name: Fakulta životního prostředí, Česká zemědělská univerzita
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: fakulta zivotniho prostredi, ceska zemedelska univerzita
+  - kind: manual
+    mode: ci
+    text: fakulta zivotniho prostredi
+  risk: review
+  risk_notes: []
+  seed_url: https://www.fzp.czu.cz/
+  verified: false
+CZ124:
+  name: Odborovy svaz pracovniku hornictvi, geologie a naftoveho prumyslu
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: odborovy svaz pracovniku hornictvi, geologie a naftoveho prumyslu
+  - kind: domain
+    mode: ci
+    text: osphgn
+  risk: review
+  risk_notes: []
+  seed_url: https://www.osphgn.cz/
+  verified: false
+CZ125:
+  name: Orlen Unipetrol
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: orlen unipetrol
+  - kind: domain
+    mode: ci
+    text: orlenunipetrol
+  risk: review
+  risk_notes: []
+  seed_url: https://www.orlenunipetrol.cz/
+  verified: false
+CZ126:
+  name: Cesky svaz ochrancu prirody
+  patterns:
+  - kind: thesis
+    mode: cs
+    text: CSOP
+  - kind: thesis
+    mode: ci
+    text: svaz ochrancu prirod
+  - kind: fullname
+    mode: ci
+    text: cesky svaz ochrancu prirody
+  - kind: domain
+    mode: ci
+    text: csop
+  risk: HIGH
+  risk_notes:
+  - 'csop: very short case-insensitive pattern'
+  seed_url: https://csop.cz/
+  verified: true
+CZ127:
+  name: Ustecky kraj
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: ustecky kraj
+  - kind: domain
+    mode: ci
+    text: kr-ustecky
+  risk: review
+  risk_notes: []
+  seed_url: https://www.kr-ustecky.cz/
+  verified: false
+CZ128:
+  name: Veolia Energy
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: veolia energy
+  - kind: domain
+    mode: ci
+    text: vecr
+  risk: HIGH
+  risk_notes:
+  - 'vecr: very short case-insensitive pattern'
+  seed_url: https://www.vecr.cz/
+  verified: false
+CZ129:
+  name: Ekologicky institut Veronica
+  patterns:
+  - kind: thesis
+    mode: ci
+    text: veronic
+  - kind: fullname
+    mode: ci
+    text: ekologicky institut veronica
+  - kind: domain
+    mode: ci
+    text: veronica
+  risk: validated
+  risk_notes: []
+  seed_url: https://www.veronica.cz/
+  verified: true
+CZ130:
+  name: Vitkovice Steel
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: vitkovice steel
+  - kind: domain
+    mode: ci
+    text: vitkovicesteel
+  risk: review
+  risk_notes: []
+  seed_url: https://www.vitkovicesteel.com/
+  verified: false
+CZ131:
+  name: Kraj Vysocina
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: kraj vysocina
+  - kind: domain
+    mode: ci
+    text: kr-vysocina
+  risk: review
+  risk_notes: []
+  seed_url: https://www.kr-vysocina.cz/
+  verified: false
+CZ132:
+  name: Zlinsky kraj
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: zlinsky kraj
+  - kind: domain
+    mode: ci
+    text: zlinskykraj
+  risk: review
+  risk_notes: []
+  seed_url: https://zlinskykraj.cz/
+  verified: false
+CZ133:
+  name: Agrofert
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: agrofert
+  risk: review
+  risk_notes: []
+  seed_url: https://www.agrofert.cz/
+  verified: false
+CZ134:
+  name: Česká pirátská strana
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: ceska piratska strana
+  - kind: domain
+    mode: ci
+    text: pirati
+  - kind: manual
+    mode: ci
+    text: piratska strana
+  risk: review
+  risk_notes: []
+  seed_url: https://www.pirati.cz/
+  verified: false
+CZ135:
+  name: EPH
+  patterns:
+  - kind: domain
+    mode: ci
+    text: epholding
+  - kind: manual
+    mode: cs
+    text: EPH
+  - kind: manual
+    mode: ci
+    text: Energeticky a prumyslovy holding
+  risk: HIGH
+  risk_notes:
+  - 'EPH: short'
+  seed_url: https://www.epholding.cz/
+  verified: false
+CZ136:
+  name: Extinction Rebellion [Posledni generace]
+  patterns:
+  - kind: thesis
+    mode: ci
+    text: extinction rebellion
+  - kind: thesis
+    mode: ci
+    text: posledni generac
+  - kind: domain
+    mode: ci
+    text: extinctionrebellion
+  risk: validated
+  risk_notes: []
+  seed_url: https://www.extinctionrebellion.cz/
+  verified: true
+CZ137:
+  name: Fakta o klimatu
+  patterns:
+  - kind: thesis
+    mode: ci
+    text: fakta o klimatu
+  - kind: domain
+    mode: ci
+    text: faktaoklimatu
+  risk: validated
+  risk_notes: []
+  seed_url: https://faktaoklimatu.cz/
+  verified: true
+CZ138:
+  name: Fridays for Future
+  patterns:
+  - kind: thesis
+    mode: cs
+    text: FFF
+  - kind: thesis
+    mode: ci
+    text: fridays for future
+  - kind: domain
+    mode: ci
+    text: fridaysforfuture
+  risk: validated
+  risk_notes: []
+  seed_url: https://www.fridaysforfuture.cz/
+  verified: true
+CZ139:
+  name: Limity jsme my
+  patterns:
+  - kind: thesis
+    mode: ci
+    text: limity jsme my
+  - kind: domain
+    mode: ci
+    text: limityjsmemy
+  risk: validated
+  risk_notes: []
+  seed_url: https://limityjsmemy.cz/
+  verified: true
+CZ140:
+  name: STAN
+  patterns:
+  - kind: manual
+    mode: ci
+    text: Starostove a nezavisli
+  risk: review
+  risk_notes: []
+  seed_url: https://www.starostove.cz/
+  verified: false
+CZ200:
+  name: Hlinsko
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: hlinsko
+  - kind: stem
+    mode: ci
+    text: hlinsk
+  risk: review
+  risk_notes: []
+  seed_url: https://www.hlinsko.cz/
+  verified: false
+CZ201:
+  name: Chrudim
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: chrudim
+  risk: review
+  risk_notes: []
+  seed_url: https://www.chrudim.eu/
+  verified: false
+CZ203:
+  name: KMVES, FSS, MUNI
+  patterns:
+  - kind: fullname
+    mode: ci
+    text: kmves, fss, muni
+  - kind: manual
+    mode: cs
+    text: KMVES
+  - kind: manual
+    mode: ci
+    text: katedra mezinarodnich vztahu a evropskych studii
+  risk: review
+  risk_notes: []
+  seed_url: https://mve.fss.muni.cz/
+  verified: false
+CZ204:
+  name: CEPS
+  patterns:
+  - kind: domain
+    mode: ci
+    text: ceps
+  - kind: manual
+    mode: cs
+    text: CEPS
+  risk: HIGH
+  risk_notes:
+  - 'ceps: short'
+  - 'CEPS: short'
+  seed_url: https://www.ceps.cz/
+  verified: false
