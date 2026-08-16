@@ -310,7 +310,7 @@ def _process(job):
 
 
 # ── driver ─────────────────────────────────────────────────────────────────────
-def load_todo(crawler_db, out_path, limit=None):
+def load_todo(crawler_db, out_path, limit=None, exclude_orgs=()):
     """Anti-join in SQL rather than a Python set: on resume this avoids pulling
     4.15M ids into memory just to discard most of them."""
     src = sqlite3.connect(f"file:{crawler_db}?mode=ro", uri=True)
@@ -322,12 +322,16 @@ def load_todo(crawler_db, out_path, limit=None):
     already = src.execute("SELECT COUNT(*) FROM f.docs").fetchone()[0]
     q = ("SELECT p.doc_id, p.org_id, p.url, p.file_path FROM pages p "
          "WHERE p.doc_id IS NOT NULL AND p.file_path IS NOT NULL "
-         "AND NOT EXISTS (SELECT 1 FROM f.docs d WHERE d.doc_id = p.doc_id) "
-         "ORDER BY p.org_id, p.id")
+         "AND NOT EXISTS (SELECT 1 FROM f.docs d WHERE d.doc_id = p.doc_id) ")
+    params = []
+    if exclude_orgs:
+        q += "AND p.org_id NOT IN (%s) " % ",".join("?" * len(exclude_orgs))
+        params = list(exclude_orgs)
+    q += "ORDER BY p.org_id, p.id"
     if limit:
         q += f" LIMIT {int(limit)}"
     todo = [(r["doc_id"], r["org_id"], r["url"], r["file_path"])
-            for r in src.execute(q)]
+            for r in src.execute(q, params)]
     src.close()
     return todo, already, total
 
@@ -360,6 +364,9 @@ def main(argv=None):
     ap.add_argument("--max-load", type=float, default=0.0,
                     help="pause while 1-min load average exceeds this (0=off)")
     ap.add_argument("--nice", type=int, default=10)
+    ap.add_argument("--exclude-orgs", default="",
+                    help="comma-separated org_ids to skip (e.g. orgs still "
+                         "being crawled); re-run later to pick them up")
     ap.add_argument("--status", action="store_true")
     args = ap.parse_args(argv)
 
@@ -389,8 +396,11 @@ def main(argv=None):
     signal.signal(signal.SIGINT, _sig)
     signal.signal(signal.SIGTERM, _sig)
 
-    todo, already, total = load_todo(args.crawler_db,
-                                 out_root / 'filter.db', args.limit)
+    excl = tuple(x.strip() for x in args.exclude_orgs.split(",") if x.strip())
+    todo, already, total = load_todo(args.crawler_db, out_root / 'filter.db',
+                                     args.limit, excl)
+    if excl:
+        print(f"  excluding orgs (still crawling): {', '.join(excl)}")
     print(f"  corpus {total:,} docs | already indexed {already:,} | to do {len(todo):,}")
     print(f"  workers={args.workers} batch={args.batch} nice={args.nice} "
           f"max_load={args.max_load or 'off'}", flush=True)
